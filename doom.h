@@ -6,7 +6,7 @@
 /*   By: dhorvill <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/09/08 21:23:19 by dhorvill          #+#    #+#             */
-/*   Updated: 2018/09/08 22:02:31 by dhorvill         ###   ########.fr       */
+/*   Updated: 2018/09/10 23:13:46 by dhorvill         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,9 +18,22 @@
 # include "libft.h"
 # include "get_next_line.h"
 
-# define SCREEN_HEIGHT 1000
-# define SCREEN_WIDTH 1000
+# define SCREEN_HEIGHT 1250
+# define SCREEN_WIDTH 1250
 # define TEXTURE 500
+
+typedef	struct	s_line
+{
+	float		dx;
+	int			sx;
+	float		dy;
+	int			sy;
+	float		m;
+	float		pb;
+	int			intm;
+	int			intb;
+}				t_line;
+
 
 typedef struct	s_pixels
 {
@@ -32,11 +45,18 @@ typedef struct	s_pixels
 	Uint8		b;
 }				t_pixel;
 
-typedef	struct	s_point
+typedef	struct	s_coord
 {
 	int			x;
 	int			y;
-}				t_point;
+}				t_coord;
+
+typedef struct	s_wall
+{
+	t_coord		start;
+	t_coord		end;
+	int			error;
+}				t_wall;
 
 typedef struct	s_cast
 {
@@ -118,5 +138,12 @@ typedef struct	s_texture
 	SDL_Surface	*portal;
 	SDL_Surface	*door;
 }				t_texture;
+
+void			put_pixel32(SDL_Surface *surface, int x, int y, Uint32 pixel);
+Uint32			get_pixel(SDL_Surface *surface, int x, int y);
+t_line			mdy(t_wind wind, t_coord point, t_coord next_point, t_line line);
+t_line			mdx(t_wind wind, t_coord point, t_coord next_point, t_line line);
+int				ft_draw_line2(t_wind wind, t_coord point, t_coord next_point, t_line line);
+
 
 #endif

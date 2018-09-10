@@ -6,11 +6,11 @@
 /*   By: dhorvill <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/09/04 20:30:14 by dhorvill          #+#    #+#             */
-/*   Updated: 2018/09/06 20:50:09 by dhorvill         ###   ########.fr       */
+/*   Updated: 2018/09/09 00:49:41 by dhorvill         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "wolf.h"
+#include "doom.h"
 
 void	put_pixel32(SDL_Surface *surface, int x, int y, Uint32 pixel)
 {
