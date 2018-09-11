@@ -6,7 +6,7 @@
 /*   By: dhorvill <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/09/08 21:23:19 by dhorvill          #+#    #+#             */
-/*   Updated: 2018/09/10 23:13:46 by dhorvill         ###   ########.fr       */
+/*   Updated: 2018/09/11 01:28:08 by dhorvill         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,19 +21,6 @@
 # define SCREEN_HEIGHT 1250
 # define SCREEN_WIDTH 1250
 # define TEXTURE 500
-
-typedef	struct	s_line
-{
-	float		dx;
-	int			sx;
-	float		dy;
-	int			sy;
-	float		m;
-	float		pb;
-	int			intm;
-	int			intb;
-}				t_line;
-
 
 typedef struct	s_pixels
 {
@@ -50,6 +37,20 @@ typedef	struct	s_coord
 	int			x;
 	int			y;
 }				t_coord;
+
+typedef	struct	s_line
+{
+	float		dx;
+	int			sx;
+	float		dy;
+	int			sy;
+	float		m;
+	float		pb;
+	int			intm;
+	int			intb;
+	int			color;
+	t_coord		offset;
+}				t_line;
 
 typedef struct	s_wall
 {
@@ -144,6 +145,6 @@ Uint32			get_pixel(SDL_Surface *surface, int x, int y);
 t_line			mdy(t_wind wind, t_coord point, t_coord next_point, t_line line);
 t_line			mdx(t_wind wind, t_coord point, t_coord next_point, t_line line);
 int				ft_draw_line2(t_wind wind, t_coord point, t_coord next_point, t_line line);
-
+void			draw_grid(t_wind wind, t_coord mouse_pos, t_coord offset, t_coord map_offset);
 
 #endif

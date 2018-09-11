@@ -6,12 +6,18 @@
 /*   By: dhorvill <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/09/08 21:27:55 by dhorvill          #+#    #+#             */
-/*   Updated: 2018/09/10 23:19:40 by dhorvill         ###   ########.fr       */
+/*   Updated: 2018/09/11 02:30:45 by dhorvill         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include <stdio.h>
 #include "doom.h"
+
+void	check_key_up(t_wind wind, int *ctrl, int *drawing)
+{
+	if (wind.event.key.keysym.sym == SDLK_LCTRL)
+		*ctrl = 0;
+}
 
 void		ft_puttab(char **tab)
 {
@@ -20,13 +26,18 @@ void		ft_puttab(char **tab)
 		ft_putendl(tab[i]);
 }
 
-int			check_key_down(t_wind wind)
+int			check_key_down(t_wind wind, int *ctrl, int *drawing)
 {
 	if (wind.event.key.keysym.sym == SDLK_ESCAPE)
 	{
 		SDL_DestroyWindow(wind.window);
 		SDL_Quit();
 		return (0);
+	}
+	if (wind.event.key.keysym.sym == SDLK_LCTRL)
+	{
+		*ctrl = 1;
+		*drawing = 0;
 	}
 	return (1);
 }
@@ -35,15 +46,22 @@ int			ft_iatoi(char *wall, int index)
 {
 	int number;
 	int i;
+	int	negative;
 
 	i = index;
+	negative = 1;
 	number = 0;
+	if (wall[index] == '-')
+	{
+		i++;
+		negative = -1;
+	}
 	while (wall[i] && wall[i] >= '0' && wall[i] <= '9')
 	{
 		number = number * 10 + wall[i] - '0';
 		i++;
 	}
-	return (number);
+	return (number * negative);
 }
 
 char		**read_lines(fd)
@@ -96,7 +114,7 @@ t_wall		*separate_walls(char **walls)
 		count = 0;
 		while (walls[i][j])
 		{
-			while(walls[i][j] && (walls[i][j] < '0' || walls[i][j] > '9'))
+			while(walls[i][j] && (walls[i][j] != '-' && (walls[i][j] < '0' || walls[i][j] > '9')))
 				j++;
 			if (count == 0)
 				w_coords[i].start.x = ft_iatoi(walls[i], j);
@@ -106,7 +124,7 @@ t_wall		*separate_walls(char **walls)
 				w_coords[i].end.x = ft_iatoi(walls[i], j);
 			else if (count == 3)
 				w_coords[i].end.y = ft_iatoi(walls[i], j);
-			while (walls[i][j] && walls[i][j] >= '0' && walls[i][j] <= '9')
+			while (walls[i][j] && ((walls[i][j] >= '0' && walls[i][j] <= '9') || walls[i][j] == '-'))
 				j++;
 			count++;
 		}
@@ -143,19 +161,16 @@ char		**ft_append(char **tab, char *s)
 	return (ss);
 }
 
-void		re_draw_walls(int fd, t_wind wind, t_wall *w_coords, char **walls)
+void		re_draw_walls(int fd, t_wind wind, t_wall *w_coords, char **walls, t_coord map_offset)
 {
-//	char	**walls;
-//	t_wall	*w_coords;
 	int		i;
 	t_line	line;
 
 	i = -1;
-	//walls = read_lines(fd);
-	//w_coords = separate_walls(walls);
+	line.color = 0xffffff;
+	line.offset = map_offset;
 	while (++i < ft_tablen(walls))
 		ft_draw_line2(wind, w_coords[i].start, w_coords[i].end, line);
-	//free(w_coords);
 }
 
 char		*get_last_line(int fd)
@@ -182,15 +197,15 @@ char		**update_walls(char **walls, t_wall **w_coords, int fd, int flag)
 	return (walls);
 }
 
-void		write_l_coords(t_coord start, t_coord end, int fd)
+void		write_l_coords(t_coord start, t_coord end, int fd, t_coord offset)
 {
-	ft_putnbr_fd(start.x, fd);
+	ft_putnbr_fd(start.x - offset.x, fd);
 	ft_putchar_fd('.', fd);
-	ft_putnbr_fd(start.y, fd);
+	ft_putnbr_fd(start.y - offset.y, fd);
 	ft_putchar_fd(':', fd);
-	ft_putnbr_fd(end.x, fd);
+	ft_putnbr_fd(end.x - offset.x, fd);
 	ft_putchar_fd('.', fd);
-	ft_putnbr_fd(end.y, fd);
+	ft_putnbr_fd(end.y - offset.y, fd);
 	ft_putchar_fd('\n', fd);
 }
 
@@ -203,67 +218,105 @@ int			main(int argc, char **argv)
 	char		**walls;
 	t_wall		*w_coords;
 	t_coord		mouse_pos;
+	t_coord		offset;
+	t_coord		map_offset;
+	t_coord		past_pos;
 	int			drawing;
 	int			fd;
 	int			flag;
 	char		*buf;
+	int			ctrl;
+	int			msbutton;
 	t_coord		start_line;
 
 	drawing = 0;
 	flag = 0;
+	line.offset.x = 0;
+	line.offset.y = 0;
+	offset.x = 0;
+	line.color = 0xffffff;
+	offset.y = 0;
+	map_offset.x = 0;
+	map_offset.y = 0;
+	ctrl = 0;
+	msbutton = 2;
 	wind = init_wind(wind);
 	mouse_pos.x = 0;
 	mouse_pos.y = 0;
-	fd = open("lines.txt", O_RDWR | O_APPEND);
-	if (get_next_line(fd, &buf) != -1)
-	{
-		flag = 1;
-		walls = update_walls(walls, &w_coords, fd, flag);
-		re_draw_walls(fd, wind, w_coords, walls);
-		ft_strdel(&buf);
-	}
-	close (fd);
+	//fd = open("lines.txt", O_RDONLY);
+//	if (get_next_line(fd, &buf) != -1)
+//	{
+//		flag = 1;
+///		ft_strdel(&buf);
+///	}
+//	close (fd);
 	fd = open("lines.txt", O_CREAT | O_RDWR | O_APPEND);
 	while (1)
 	{
+		draw_grid(wind, mouse_pos, offset, map_offset);
 		while (SDL_PollEvent(&wind.event))
 		{
 			if (wind.event.type == SDL_KEYDOWN)
-				if (check_key_down(wind) == 0)
+				if (check_key_down(wind, &ctrl, &drawing) == 0)
 				{
 					close(fd);
 					return (0);
 				}
-			if (wind.event.type == SDL_MOUSEMOTION)
+		}/*	if (wind.event.type == SDL_MOUSEMOTION)
 			{
+				past_pos.x = mouse_pos.x;
+				past_pos.y = mouse_pos.y;
+				mouse_pos.x = wind.event.motion.x;
+				mouse_pos.y = wind.event.motion.y;
+				if (msbutton == 1 && ctrl == 1)
+				{
+					SDL_FillRect(wind.screen, NULL, 0x000000);
+					offset.x = -wind.event.motion.x;
+					offset.y = -wind.event.motion.y;
+					map_offset.x += mouse_pos.x - past_pos.x;
+					map_offset.y += mouse_pos.y - past_pos.y;
+					draw_grid(wind, mouse_pos, offset, map_offset);
+					re_draw_walls(fd, wind, w_coords, walls, map_offset);
+					close (fd);
+					fd = open("lines.txt", O_RDWR | O_APPEND);
+				}
 				if (drawing == 1)
 				{
 					SDL_FillRect(wind.screen, NULL, 0x000000);
+					draw_grid(wind, mouse_pos, offset, map_offset);
 					if (flag == 1)
 					{
-						re_draw_walls(fd, wind, w_coords, walls);
+						re_draw_walls(fd, wind, w_coords, walls, map_offset);
 						close (fd);
 						fd = open("lines.txt", O_RDWR | O_APPEND);
 					}
 				}
-				mouse_pos.x = wind.event.motion.x;
-				mouse_pos.y = wind.event.motion.y;
 			}
 			if (wind.event.type == SDL_MOUSEBUTTONDOWN)
 			{
+				msbutton = 1;
 				start_line = mouse_pos;
-				drawing = 1;
+				if (ctrl == 1)
+					drawing = 0;
+				else
+					drawing = 1;
 			}
 			else if (wind.event.type == SDL_MOUSEBUTTONUP)
 			{
-				write_l_coords(start_line, mouse_pos, fd);
-				walls = update_walls(walls, &w_coords, fd, flag);
+				msbutton = 0;
+				if (drawing == 1)
+				{
+					write_l_coords(start_line, mouse_pos, fd, map_offset);
+					walls = update_walls(walls, &w_coords, fd, flag);
+				}
 				drawing = 0;
 				flag = 1;
 			}
+			if (wind.event.type == SDL_KEYUP)
+				check_key_up(wind, &ctrl, &drawing);
 			if (drawing == 1)
 			   ft_draw_line2(wind, start_line, mouse_pos, line);
-		}
+		}*/
 		SDL_UpdateWindowSurface(wind.window);
 	}
 }
