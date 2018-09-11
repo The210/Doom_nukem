@@ -6,7 +6,7 @@
 /*   By: dhorvill <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/09/08 21:27:55 by dhorvill          #+#    #+#             */
-/*   Updated: 2018/09/11 02:30:45 by dhorvill         ###   ########.fr       */
+/*   Updated: 2018/09/11 03:00:07 by dhorvill         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -129,7 +129,6 @@ t_wall		*separate_walls(char **walls)
 			count++;
 		}
 	}
-//	printf("%i, %i, %i %i\n", w_coords[0].start.x, w_coords[0].start.y, w_coords[0].end.x, w_coords[0].end.y);
 	return (w_coords);
 }
 
@@ -187,9 +186,6 @@ char		*get_last_line(int fd)
 
 char		**update_walls(char **walls, t_wall **w_coords, int fd, int flag)
 {
-	///if (flag == 1)
-	//	walls = ft_append(walls, get_last_line(fd));
-//	else
 	walls = read_lines(fd);
 	if (*w_coords)
 		free(*w_coords);
@@ -225,12 +221,15 @@ int			main(int argc, char **argv)
 	int			fd;
 	int			flag;
 	char		*buf;
+	int			bleh;
 	int			ctrl;
+	int			a;
 	int			msbutton;
 	t_coord		start_line;
 
 	drawing = 0;
 	flag = 0;
+	bleh = 0;
 	line.offset.x = 0;
 	line.offset.y = 0;
 	offset.x = 0;
@@ -243,17 +242,20 @@ int			main(int argc, char **argv)
 	wind = init_wind(wind);
 	mouse_pos.x = 0;
 	mouse_pos.y = 0;
-	//fd = open("lines.txt", O_RDONLY);
-//	if (get_next_line(fd, &buf) != -1)
-//	{
-//		flag = 1;
-///		ft_strdel(&buf);
-///	}
-//	close (fd);
+	fd = open("lines.txt", O_CREAT | O_RDWR | O_APPEND);
+	if ((a = get_next_line(fd, &buf)) != -1 || a != 0)
+	{
+		flag = 1;
+		walls = update_walls(walls, &w_coords, fd, flag);
+		re_draw_walls(fd, wind, w_coords, walls, map_offset);
+		close (fd);
+		fd = open("lines.txt", O_RDWR | O_APPEND);
+		ft_strdel(&buf);
+	}
+	close (fd);
 	fd = open("lines.txt", O_CREAT | O_RDWR | O_APPEND);
 	while (1)
 	{
-		draw_grid(wind, mouse_pos, offset, map_offset);
 		while (SDL_PollEvent(&wind.event))
 		{
 			if (wind.event.type == SDL_KEYDOWN)
@@ -262,7 +264,7 @@ int			main(int argc, char **argv)
 					close(fd);
 					return (0);
 				}
-		}/*	if (wind.event.type == SDL_MOUSEMOTION)
+			if (wind.event.type == SDL_MOUSEMOTION)
 			{
 				past_pos.x = mouse_pos.x;
 				past_pos.y = mouse_pos.y;
@@ -286,6 +288,7 @@ int			main(int argc, char **argv)
 					draw_grid(wind, mouse_pos, offset, map_offset);
 					if (flag == 1)
 					{
+						walls = update_walls(walls, &w_coords, fd, flag);
 						re_draw_walls(fd, wind, w_coords, walls, map_offset);
 						close (fd);
 						fd = open("lines.txt", O_RDWR | O_APPEND);
@@ -316,7 +319,20 @@ int			main(int argc, char **argv)
 				check_key_up(wind, &ctrl, &drawing);
 			if (drawing == 1)
 			   ft_draw_line2(wind, start_line, mouse_pos, line);
-		}*/
+		}
+		if (bleh == 0 || bleh == 2)
+		{
+			bleh = 1;
+			draw_grid(wind, mouse_pos, offset, map_offset);
+			if (bleh == 2)
+			{
+				flag = 1;
+				walls = update_walls(walls, &w_coords, fd, flag);
+				re_draw_walls(fd, wind, w_coords, walls, map_offset);
+				close (fd);
+				fd = open("lines.txt", O_RDWR | O_APPEND);
+			}
+		}
 		SDL_UpdateWindowSurface(wind.window);
 	}
 }
