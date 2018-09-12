@@ -6,7 +6,7 @@
 /*   By: dhorvill <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/09/10 23:59:24 by dhorvill          #+#    #+#             */
-/*   Updated: 2018/09/11 03:04:26 by dhorvill         ###   ########.fr       */
+/*   Updated: 2018/09/12 18:01:34 by dhorvill         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,7 +39,7 @@ void		draw_grid(t_wind wind, t_coord mouse_pos, t_coord offset, t_coord map_offs
 	}
 	point.y = 0;
 	next_point.y = SCREEN_HEIGHT - 1;
-	i = 0;
+	i = -1;
 	while (++i < SCREEN_WIDTH)
 	{
 		if ((offset.x % (SCREEN_WIDTH / 75)) == 0)

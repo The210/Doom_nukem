@@ -6,7 +6,7 @@
 /*   By: dhorvill <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/09/08 21:27:55 by dhorvill          #+#    #+#             */
-/*   Updated: 2018/09/11 03:00:07 by dhorvill         ###   ########.fr       */
+/*   Updated: 2018/09/13 00:19:43 by dhorvill         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -205,6 +205,36 @@ void		write_l_coords(t_coord start, t_coord end, int fd, t_coord offset)
 	ft_putchar_fd('\n', fd);
 }
 
+t_coord		snap_line(char **walls, t_wall *w_coords, t_coord mouse_pos, t_coord map_offset)
+{
+	int		i;
+	t_coord	start_line;
+	
+	i = -1;
+	start_line.x = mouse_pos.x;
+	start_line.y = mouse_pos.y;
+
+	if (walls)
+	{
+		while (++i < ft_tablen(walls))
+		{
+			if (sqrt(pow(map_offset.x + w_coords[i].start.x - mouse_pos.x, 2) + pow(map_offset.y + w_coords[i].start.y - mouse_pos.y, 2)) < 10)
+			{
+				start_line.x = w_coords[i].start.x + map_offset.x;
+				start_line.y = w_coords[i].start.y + map_offset.y;
+				break ;
+			}
+			if (sqrt(pow(map_offset.x + w_coords[i].end.x - mouse_pos.x, 2) + pow(map_offset.y + w_coords[i].end.y - mouse_pos.y, 2)) < 10)
+			{
+				start_line.x = w_coords[i].end.x + map_offset.x;
+				start_line.y = w_coords[i].end.y + map_offset.y;
+				break ;
+			}
+		}
+	}
+	return (start_line);
+}
+
 int			main(int argc, char **argv)
 {
 	t_player	player;
@@ -226,6 +256,7 @@ int			main(int argc, char **argv)
 	int			a;
 	int			msbutton;
 	t_coord		start_line;
+	t_coord		end_line;
 
 	drawing = 0;
 	flag = 0;
@@ -273,8 +304,8 @@ int			main(int argc, char **argv)
 				if (msbutton == 1 && ctrl == 1)
 				{
 					SDL_FillRect(wind.screen, NULL, 0x000000);
-					offset.x = -wind.event.motion.x;
-					offset.y = -wind.event.motion.y;
+					offset.x -= mouse_pos.x - past_pos.x;
+					offset.y -= mouse_pos.y - past_pos.y;
 					map_offset.x += mouse_pos.x - past_pos.x;
 					map_offset.y += mouse_pos.y - past_pos.y;
 					draw_grid(wind, mouse_pos, offset, map_offset);
@@ -298,7 +329,7 @@ int			main(int argc, char **argv)
 			if (wind.event.type == SDL_MOUSEBUTTONDOWN)
 			{
 				msbutton = 1;
-				start_line = mouse_pos;
+				start_line = snap_line(walls, w_coords, mouse_pos, map_offset);
 				if (ctrl == 1)
 					drawing = 0;
 				else
@@ -309,8 +340,12 @@ int			main(int argc, char **argv)
 				msbutton = 0;
 				if (drawing == 1)
 				{
-					write_l_coords(start_line, mouse_pos, fd, map_offset);
+					end_line = snap_line(walls, w_coords, mouse_pos, map_offset);
+					write_l_coords(start_line, end_line, fd, map_offset);
 					walls = update_walls(walls, &w_coords, fd, flag);
+					SDL_FillRect(wind.screen, NULL, 0x000000);
+					draw_grid(wind, mouse_pos, offset, map_offset);
+					re_draw_walls(fd, wind, w_coords, walls, map_offset);
 				}
 				drawing = 0;
 				flag = 1;
