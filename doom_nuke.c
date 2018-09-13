@@ -6,17 +6,19 @@
 /*   By: dhorvill <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/09/08 21:27:55 by dhorvill          #+#    #+#             */
-/*   Updated: 2018/09/13 00:19:43 by dhorvill         ###   ########.fr       */
+/*   Updated: 2018/09/13 18:36:12 by dhorvill         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include <stdio.h>
 #include "doom.h"
 
-void	check_key_up(t_wind wind, int *ctrl, int *drawing)
+void	check_key_up(t_wind wind, int *ctrl, int *drawing, int *shift)
 {
 	if (wind.event.key.keysym.sym == SDLK_LCTRL)
 		*ctrl = 0;
+	if (wind.event.key.keysym.sym == SDLK_LSHIFT)
+		*shift = 0;
 }
 
 void		ft_puttab(char **tab)
@@ -26,8 +28,10 @@ void		ft_puttab(char **tab)
 		ft_putendl(tab[i]);
 }
 
-int			check_key_down(t_wind wind, int *ctrl, int *drawing)
+int			check_key_down(t_wind wind, int *ctrl, int *drawing, int *shift, int select, t_wall *w_coords, char **walls)
 {
+	char *tmp;
+
 	if (wind.event.key.keysym.sym == SDLK_ESCAPE)
 	{
 		SDL_DestroyWindow(wind.window);
@@ -38,6 +42,16 @@ int			check_key_down(t_wind wind, int *ctrl, int *drawing)
 	{
 		*ctrl = 1;
 		*drawing = 0;
+	}
+	if (wind.event.key.keysym.sym == SDLK_LSHIFT)
+	{
+		*shift = 1;
+		*drawing = 0;
+	}
+	if (wind.event.key.keysym.sym == SDLK_a && *shift == 1)
+	{
+		w_coords[select].start.x -= 5;
+		walls[select][3] -= '5';
 	}
 	return (1);
 }
@@ -235,6 +249,42 @@ t_coord		snap_line(char **walls, t_wall *w_coords, t_coord mouse_pos, t_coord ma
 	return (start_line);
 }
 
+int		select_wall(t_coord mouse_pos, char **walls, t_wall *w_coords)
+{
+	int distance;
+	int i;
+	int check;
+
+	i = -1;
+	check = -1;
+	if (walls)
+	{
+		while (++i < ft_tablen(walls))
+		{
+			distance = (abs((w_coords[i].end.y - w_coords[i].start.y) * mouse_pos.x - (w_coords[i].end.x - w_coords[i].start.x) * mouse_pos.y + (w_coords[i].end.x * w_coords[i].start.y) - (w_coords[i].end.y * w_coords[i].start.x)) / (sqrt(pow(w_coords[i].end.y - w_coords[i].start.y, 2) + pow(w_coords[i].end.x - w_coords[i].start.x, 2))));
+			if (distance < 10)
+			{
+				check = i;
+				break ;
+			}
+		}
+	}
+	return (check);
+}
+
+int			check_select(int shift, int select, t_coord mouse_pos, char **wals, t_wall *w_coords)
+{
+	int distance;
+
+	if (select != -1 && shift == 0)
+	{
+		distance = (abs((w_coords[select].end.y - w_coords[select].start.y) * mouse_pos.x - (w_coords[select].end.x - w_coords[select].start.x) * mouse_pos.y + (w_coords[select].end.x * w_coords[select].start.y) - (w_coords[select].end.y * w_coords[select].start.x)) / (sqrt(pow(w_coords[select].end.y - w_coords[select].start.y, 2) + pow(w_coords[select].end.x - w_coords[select].start.x, 2))));
+		if (distance > 10)
+			select = -1;
+	}
+	return (select);
+}
+
 int			main(int argc, char **argv)
 {
 	t_player	player;
@@ -246,6 +296,7 @@ int			main(int argc, char **argv)
 	t_coord		mouse_pos;
 	t_coord		offset;
 	t_coord		map_offset;
+	int			select;
 	t_coord		past_pos;
 	int			drawing;
 	int			fd;
@@ -254,12 +305,14 @@ int			main(int argc, char **argv)
 	int			bleh;
 	int			ctrl;
 	int			a;
+	int			shift;
 	int			msbutton;
 	t_coord		start_line;
 	t_coord		end_line;
 
 	drawing = 0;
 	flag = 0;
+	select = -1;
 	bleh = 0;
 	line.offset.x = 0;
 	line.offset.y = 0;
@@ -269,6 +322,7 @@ int			main(int argc, char **argv)
 	map_offset.x = 0;
 	map_offset.y = 0;
 	ctrl = 0;
+	shift = 0;
 	msbutton = 2;
 	wind = init_wind(wind);
 	mouse_pos.x = 0;
@@ -289,12 +343,18 @@ int			main(int argc, char **argv)
 	{
 		while (SDL_PollEvent(&wind.event))
 		{
+			select = check_select(shift, select, mouse_pos, walls, w_coords);
 			if (wind.event.type == SDL_KEYDOWN)
-				if (check_key_down(wind, &ctrl, &drawing) == 0)
+			{
+				SDL_FillRect(wind.screen, NULL, 0x000000);
+				draw_grid(wind, mouse_pos, offset, map_offset);
+				re_draw_walls(fd, wind, w_coords, walls, map_offset);
+				if (check_key_down(wind, &ctrl, &drawing, &shift, select, w_coords, walls) == 0)
 				{
 					close(fd);
 					return (0);
 				}
+			}
 			if (wind.event.type == SDL_MOUSEMOTION)
 			{
 				past_pos.x = mouse_pos.x;
@@ -313,6 +373,7 @@ int			main(int argc, char **argv)
 					close (fd);
 					fd = open("lines.txt", O_RDWR | O_APPEND);
 				}
+				if (msbutton == 1 && shift == 1)
 				if (drawing == 1)
 				{
 					SDL_FillRect(wind.screen, NULL, 0x000000);
@@ -330,7 +391,7 @@ int			main(int argc, char **argv)
 			{
 				msbutton = 1;
 				start_line = snap_line(walls, w_coords, mouse_pos, map_offset);
-				if (ctrl == 1)
+				if (ctrl == 1 || shift == 1 || select != -1)
 					drawing = 0;
 				else
 					drawing = 1;
@@ -338,6 +399,8 @@ int			main(int argc, char **argv)
 			else if (wind.event.type == SDL_MOUSEBUTTONUP)
 			{
 				msbutton = 0;
+				if (shift == 1)
+					select = select_wall(mouse_pos, walls, w_coords);	
 				if (drawing == 1)
 				{
 					end_line = snap_line(walls, w_coords, mouse_pos, map_offset);
@@ -351,7 +414,7 @@ int			main(int argc, char **argv)
 				flag = 1;
 			}
 			if (wind.event.type == SDL_KEYUP)
-				check_key_up(wind, &ctrl, &drawing);
+				check_key_up(wind, &ctrl, &drawing, &shift);
 			if (drawing == 1)
 			   ft_draw_line2(wind, start_line, mouse_pos, line);
 		}
