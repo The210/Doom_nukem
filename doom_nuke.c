@@ -6,7 +6,7 @@
 /*   By: dhorvill <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/09/08 21:27:55 by dhorvill          #+#    #+#             */
-/*   Updated: 2018/09/18 00:31:40 by dhorvill         ###   ########.fr       */
+/*   Updated: 2018/09/18 18:46:48 by dhorvill         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -237,36 +237,6 @@ void		write_l_coords(t_coord start, t_coord end, int fd, t_coord offset)
 	ft_putchar_fd('\n', fd);
 }
 
-t_coord		snap_line(char **walls, t_wall *w_coords, t_coord mouse_pos, t_coord map_offset)
-{
-	int		i;
-	t_coord	start_line;
-	
-	i = -1;
-	start_line.x = mouse_pos.x;
-	start_line.y = mouse_pos.y;
-
-	if (walls)
-	{
-		while (++i < ft_tablen(walls))
-		{
-			if (sqrt(pow(map_offset.x + w_coords[i].start.x - mouse_pos.x, 2) + pow(map_offset.y + w_coords[i].start.y - mouse_pos.y, 2)) < 10)
-			{
-				start_line.x = w_coords[i].start.x + map_offset.x;
-				start_line.y = w_coords[i].start.y + map_offset.y;
-				break ;
-			}
-			if (sqrt(pow(map_offset.x + w_coords[i].end.x - mouse_pos.x, 2) + pow(map_offset.y + w_coords[i].end.y - mouse_pos.y, 2)) < 10)
-			{
-				start_line.x = w_coords[i].end.x + map_offset.x;
-				start_line.y = w_coords[i].end.y + map_offset.y;
-				break ;
-			}
-		}
-	}
-	return (start_line);
-}
-
 int		in_line(t_coord mouse_pos, t_coord map_offset, t_wall w_coord)
 {
 	t_coord dir;
@@ -279,16 +249,115 @@ int		in_line(t_coord mouse_pos, t_coord map_offset, t_wall w_coord)
 	dir.y = w_coord.end.y - w_coord.start.y > 0 ? 1 : -1;
 	r_pos.x = true_pos.x - w_coord.start.x > 0 ? 1 : -1;
 	r_pos.y = true_pos.y - w_coord.start.y > 0 ? 1 : -1;
-	if (dir.x != r_pos.x || dir.y != r_pos.y)
+	if (dir.x != r_pos.x && dir.y != r_pos.y)
 		return (0);
 	dir.x = w_coord.start.x - w_coord.end.x > 0 ? 1 : -1;
 	dir.y = w_coord.start.y - w_coord.end.y > 0 ? 1 : -1;
 	r_pos.x = true_pos.x - w_coord.end.x > 0 ? 1 : -1;
 	r_pos.y = true_pos.y - w_coord.end.y > 0 ? 1 : -1;
-	if (dir.x != r_pos.x || dir.y != r_pos.y)
+	if (dir.x != r_pos.x && dir.y != r_pos.y)
 		return (0);
 	return (1);
 
+}
+
+t_coord		snap_line_select(char **walls, t_wall *w_coords, t_coord mouse_pos, t_coord map_offset, int *select)
+{
+	int		i;
+	double		scalar;
+	int		distance;
+	int		d;
+	t_coord	start_line;
+	t_vector	to_mouse;
+	t_vector	wall;
+	
+	i = -1;
+	start_line.x = mouse_pos.x;
+	start_line.y = mouse_pos.y;
+
+	if (walls)
+	{
+		while (++i < ft_tablen(walls))
+		{
+			if (i != *select)
+			{
+				distance = (abs((w_coords[i].end.y - w_coords[i].start.y) * (mouse_pos.x - map_offset.x) - (w_coords[i].end.x - w_coords[i].start.x) * (mouse_pos.y - map_offset.y) + (w_coords[i].end.x * w_coords[i].start.y) - (w_coords[i].end.y * w_coords[i].start.x)) / (sqrt(pow(w_coords[i].end.y - w_coords[i].start.y, 2) + pow(w_coords[i].end.x - w_coords[i].start.x, 2))));
+				if (sqrt(pow(map_offset.x + w_coords[i].start.x - mouse_pos.x, 2) + pow(map_offset.y + w_coords[i].start.y - mouse_pos.y, 2)) < 10)
+				{
+					start_line.x = w_coords[i].start.x + map_offset.x;
+					start_line.y = w_coords[i].start.y + map_offset.y;
+					break ;
+				}
+				if (sqrt(pow(map_offset.x + w_coords[i].end.x - mouse_pos.x, 2) + pow(map_offset.y + w_coords[i].end.y - mouse_pos.y, 2)) < 10)
+				{
+				start_line.x = w_coords[i].end.x + map_offset.x;
+				start_line.y = w_coords[i].end.y + map_offset.y;
+				break ;
+				}
+				if (distance < 10 && in_line(mouse_pos, map_offset, w_coords[i]))
+				{
+					to_mouse.x = (w_coords[i].start.x - start_line.x);
+					to_mouse.y = (w_coords[i].start.y - start_line.y);
+					wall.x = (w_coords[i].end.x - w_coords[i].start.x);
+					wall.y = (w_coords[i].end.y - w_coords[i].start.y);
+					scalar = (to_mouse.x * wall.x) + (to_mouse.y * wall.y);
+					d = sqrt(pow(wall.x, 2) + pow(wall.y, 2));
+					start_line.x = (w_coords[i].start.x - ((int)(((scalar) / (pow(d, 2))) * wall.x)));
+					start_line.y = (w_coords[i].start.y - ((int)(((scalar) / (pow(d, 2))) * wall.y)));
+					break ;
+				}
+			}
+		}
+	}
+	return (start_line);
+}
+
+t_coord		snap_line(char **walls, t_wall *w_coords, t_coord mouse_pos, t_coord map_offset)
+{
+	int		i;
+	double		scalar;
+	int		distance;
+	int		d;
+	t_coord	start_line;
+	t_vector	to_mouse;
+	t_vector	wall;
+	
+	i = -1;
+	start_line.x = mouse_pos.x;
+	start_line.y = mouse_pos.y;
+
+	if (walls)
+	{
+		while (++i < ft_tablen(walls))
+		{
+			distance = (abs((w_coords[i].end.y - w_coords[i].start.y) * (mouse_pos.x - map_offset.x) - (w_coords[i].end.x - w_coords[i].start.x) * (mouse_pos.y - map_offset.y) + (w_coords[i].end.x * w_coords[i].start.y) - (w_coords[i].end.y * w_coords[i].start.x)) / (sqrt(pow(w_coords[i].end.y - w_coords[i].start.y, 2) + pow(w_coords[i].end.x - w_coords[i].start.x, 2))));
+			if (sqrt(pow(map_offset.x + w_coords[i].start.x - mouse_pos.x, 2) + pow(map_offset.y + w_coords[i].start.y - mouse_pos.y, 2)) < 10)
+			{
+				start_line.x = w_coords[i].start.x + map_offset.x;
+				start_line.y = w_coords[i].start.y + map_offset.y;
+				break ;
+			}
+			if (sqrt(pow(map_offset.x + w_coords[i].end.x - mouse_pos.x, 2) + pow(map_offset.y + w_coords[i].end.y - mouse_pos.y, 2)) < 10)
+			{
+				start_line.x = w_coords[i].end.x + map_offset.x;
+				start_line.y = w_coords[i].end.y + map_offset.y;
+				break ;
+			}
+			if (distance < 10 && in_line(mouse_pos, map_offset, w_coords[i]))
+			{
+				to_mouse.x = (w_coords[i].start.x - start_line.x);
+				to_mouse.y = (w_coords[i].start.y - start_line.y);
+				wall.x = (w_coords[i].end.x - w_coords[i].start.x);
+				wall.y = (w_coords[i].end.y - w_coords[i].start.y);
+				scalar = (to_mouse.x * wall.x) + (to_mouse.y * wall.y);
+				d = sqrt(pow(wall.x, 2) + pow(wall.y, 2));
+				start_line.x = (w_coords[i].start.x - ((int)(((scalar) / (pow(d, 2))) * wall.x)));
+				start_line.y = (w_coords[i].start.y - ((int)(((scalar) / (pow(d, 2))) * wall.y)));
+				break ;
+			}
+		}
+	}
+	return (start_line);
 }
 
 int		select_wall(t_coord mouse_pos, char **walls, t_wall *w_coords, t_coord map_offset)
@@ -365,6 +434,9 @@ void		change_fd(int fd, t_wall *w_coords, char **walls, int *select, int *delete
 t_wall		*move_line(char **walls, t_wall *w_coords, t_coord mouse_pos, t_coord past_pos, int *select, t_coord map_offset, int fd, int *delete)
 {
 	t_coord movement;
+	t_coord zero;
+	zero.x = 0;
+	zero.y = 0;
 	movement.x = mouse_pos.x - past_pos.x;
 	movement.y = mouse_pos.y - past_pos.y;
 	if (sqrt(pow(map_offset.x + w_coords[*select].start.x - mouse_pos.x, 2) + pow(map_offset.y + w_coords[*select].start.y - mouse_pos.y, 2)) < 20)
@@ -384,6 +456,8 @@ t_wall		*move_line(char **walls, t_wall *w_coords, t_coord mouse_pos, t_coord pa
 		w_coords[*select].end.x += movement.x;
 		w_coords[*select].end.y += movement.y;
 	}
+	w_coords[*select].start = snap_line_select(walls, w_coords, w_coords[*select].start, zero, select);
+	w_coords[*select].end = snap_line_select(walls, w_coords, w_coords[*select].end, zero, select);
 	change_fd(fd, w_coords, walls, select, delete);
 	return (w_coords);
 }
