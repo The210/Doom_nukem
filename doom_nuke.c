@@ -6,7 +6,7 @@
 /*   By: dhorvill <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/09/08 21:27:55 by dhorvill          #+#    #+#             */
-/*   Updated: 2018/09/18 18:46:48 by dhorvill         ###   ########.fr       */
+/*   Updated: 2018/09/20 19:19:01 by dhorvill         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,7 +25,7 @@ void	ft_puttab_fd(char **tab, int fd)
 	}
 }
 
-void	check_key_up(t_wind wind, int *ctrl, int *drawing, int *shift, int *delete)
+void	check_key_up(t_wind wind, int *ctrl, int *drawing, int *shift, int *delete, int *snap)
 {
 	if (wind.event.key.keysym.sym == SDLK_LCTRL)
 		*ctrl = 0;
@@ -33,6 +33,8 @@ void	check_key_up(t_wind wind, int *ctrl, int *drawing, int *shift, int *delete)
 		*shift = 0;
 	if (wind.event.key.keysym.sym == SDLK_p)
 		*delete = 1;
+	if (wind.event.key.keysym.sym == SDLK_n)
+		*snap = 1;
 }
 
 void		ft_puttab(char **tab)
@@ -345,14 +347,14 @@ t_coord		snap_line(char **walls, t_wall *w_coords, t_coord mouse_pos, t_coord ma
 			}
 			if (distance < 10 && in_line(mouse_pos, map_offset, w_coords[i]))
 			{
-				to_mouse.x = (w_coords[i].start.x - start_line.x);
-				to_mouse.y = (w_coords[i].start.y - start_line.y);
+				to_mouse.x = (w_coords[i].start.x - (start_line.x - map_offset.x));
+				to_mouse.y = (w_coords[i].start.y - (start_line.y - map_offset.y));
 				wall.x = (w_coords[i].end.x - w_coords[i].start.x);
 				wall.y = (w_coords[i].end.y - w_coords[i].start.y);
 				scalar = (to_mouse.x * wall.x) + (to_mouse.y * wall.y);
 				d = sqrt(pow(wall.x, 2) + pow(wall.y, 2));
-				start_line.x = (w_coords[i].start.x - ((int)(((scalar) / (pow(d, 2))) * wall.x)));
-				start_line.y = (w_coords[i].start.y - ((int)(((scalar) / (pow(d, 2))) * wall.y)));
+				start_line.x = (w_coords[i].start.x - ((int)(((scalar) / (pow(d, 2))) * wall.x)) + map_offset.x);
+				start_line.y = (w_coords[i].start.y - ((int)(((scalar) / (pow(d, 2))) * wall.y)) + map_offset.y);
 				break ;
 			}
 		}
@@ -431,6 +433,27 @@ void		change_fd(int fd, t_wall *w_coords, char **walls, int *select, int *delete
 	}
 }
 
+t_wall		*snap_all(char **walls, t_wall *w_coords, int fd)
+{
+	int i;
+	int p;
+	int delete;
+	t_coord zero;
+
+	i = -1;
+	p = -1;
+	delete = 0;
+	zero.x = 0;
+	zero.y = 0;
+	while (++i < ft_tablen(walls))
+	{
+		w_coords[i].start = snap_line_select(walls, w_coords, w_coords[i].start, zero, &i);
+		w_coords[i].end = snap_line_select(walls, w_coords, w_coords[i].end, zero, &i);
+	}
+	change_fd(fd, w_coords, walls, &p, &delete);
+	return (w_coords);
+}
+
 t_wall		*move_line(char **walls, t_wall *w_coords, t_coord mouse_pos, t_coord past_pos, int *select, t_coord map_offset, int fd, int *delete)
 {
 	t_coord movement;
@@ -482,6 +505,7 @@ int			main(int argc, char **argv)
 	int			bleh;
 	int			ctrl;
 	int			a;
+	int			snap;
 	int			shift;
 	int			msbutton;
 	int			delete;
@@ -490,6 +514,7 @@ int			main(int argc, char **argv)
 
 	drawing = 0;
 	flag = 0;
+	snap = 0;
 	select = -1;
 	bleh = 0;
 	delete = 0;
@@ -620,7 +645,19 @@ int			main(int argc, char **argv)
 				flag = 1;
 			}
 			if (wind.event.type == SDL_KEYUP)
-				check_key_up(wind, &ctrl, &drawing, &shift, &delete);
+				check_key_up(wind, &ctrl, &drawing, &shift, &delete, &snap);
+			if (snap == 1 && ctrl == 0 && msbutton == 0 && shift == 0)
+			{
+				w_coords = snap_all(walls, w_coords, fd);
+				walls = update_walls(walls, &w_coords, fd, flag);
+				SDL_FillRect(wind.screen, NULL, 0x000000);
+				draw_grid(wind, mouse_pos, offset, map_offset);
+				re_draw_walls(fd, wind, w_coords, walls, map_offset);
+				if (select != -1)
+					draw_select(fd, wind, w_coords[select], map_offset);
+				snap = 0;
+			}
+			snap = 0;
 			if (drawing == 1)
 			   ft_draw_line2(wind, start_line, mouse_pos, line);
 		}
