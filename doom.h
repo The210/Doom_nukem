@@ -6,7 +6,7 @@
 /*   By: dhorvill <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/09/08 21:23:19 by dhorvill          #+#    #+#             */
-/*   Updated: 2018/09/13 21:36:10 by dhorvill         ###   ########.fr       */
+/*   Updated: 2018/09/26 23:08:52 by dhorvill         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,6 +17,8 @@
 # include "SDL.h"
 # include "libft.h"
 # include "get_next_line.h"
+#include <sys/types.h>
+#include <sys/stat.h>
 
 # define SCREEN_HEIGHT 1250
 # define SCREEN_WIDTH 1250
@@ -31,6 +33,12 @@ typedef struct	s_pixels
 	Uint8		g;
 	Uint8		b;
 }				t_pixel;
+
+typedef struct	s_fd
+{
+	int			walls;
+	int			squares;
+}				t_fd;
 
 typedef	struct	s_coord
 {
@@ -146,5 +154,10 @@ t_line			mdy(t_wind wind, t_coord point, t_coord next_point, t_line line);
 t_line			mdx(t_wind wind, t_coord point, t_coord next_point, t_line line);
 int				ft_draw_line2(t_wind wind, t_coord point, t_coord next_point, t_line line);
 void			draw_grid(t_wind wind, t_coord mouse_pos, t_coord offset, t_coord map_offset);
+int				in_liner(t_coord start, t_coord end, t_vector temp_coords);
+void			line_path(t_coord start, t_coord end, t_fd fd);
+t_wall			find_croners(char **walls, t_wall *w_coords, t_wall corner);
+char			**create_map(t_fd fd, char **wals, t_wall *w_coords, char **map);
+
 
 #endif

@@ -6,24 +6,12 @@
 /*   By: dhorvill <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/09/08 21:27:55 by dhorvill          #+#    #+#             */
-/*   Updated: 2018/09/20 19:19:01 by dhorvill         ###   ########.fr       */
+/*   Updated: 2018/09/26 23:16:21 by dhorvill         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include <stdio.h>
 #include "doom.h"
-
-void	ft_puttab_fd(char **tab, int fd)
-{
-	int i;
-
-	i = -1;
-	while (tab[++i])
-	{
-		ft_putstr_fd(tab[i], fd);
-		ft_putchar_fd('\n', fd);
-	}
-}
 
 void	check_key_up(t_wind wind, int *ctrl, int *drawing, int *shift, int *delete, int *snap)
 {
@@ -35,13 +23,6 @@ void	check_key_up(t_wind wind, int *ctrl, int *drawing, int *shift, int *delete,
 		*delete = 1;
 	if (wind.event.key.keysym.sym == SDLK_n)
 		*snap = 1;
-}
-
-void		ft_puttab(char **tab)
-{
-	int i = -1;
-	while (tab[++i])
-		ft_putendl(tab[i]);
 }
 
 int			check_key_down(t_wind wind, int *ctrl, int *drawing, int *shift, int select, t_wall *w_coords, char **walls)
@@ -89,7 +70,7 @@ int			ft_iatoi(char *wall, int index)
 	return (number * negative);
 }
 
-char		**read_lines(fd)
+char		**read_lines(t_fd fd)
 {
 	char	*buf;
 	int		ret;
@@ -97,9 +78,9 @@ char		**read_lines(fd)
 	char	*str;
 
 	str = ft_strnew(1);
-	close(fd);
-	fd = open("lines.txt", O_RDONLY);
-	while ((ret = get_next_line(fd, &buf)) == 1)
+	close(fd.walls);
+	fd.walls = open("walls.txt", O_RDONLY);
+	while ((ret = get_next_line(fd.walls, &buf)) == 1)
 	{
 		str = ft_strjoin2(str, buf);
 		ft_strdel(&buf);
@@ -157,35 +138,7 @@ t_wall		*separate_walls(char **walls)
 	return (w_coords);
 }
 
-char		**ft_append(char **tab, char *s)
-{
-	char	**ss;
-	int		i;
-	int		j;
-
-	if (!tab && !s)
-		return (NULL);
-	if (!tab)
-	{
-		ss = (char**)malloc(sizeof(ss) * 2);
-		ss[0] = ft_strdup(s);
-		ss[1] = NULL;
-		return (ss);
-	}
-	if (!s)
-		return (tab);
-	if ((ss = (char**)malloc(sizeof(ss) * (ft_tablen(tab) + 2))) == 0)
-		return (NULL);
-	ss[ft_tablen(ss)] = NULL;
-	i = -1;
-	while (tab[++i])
-		ss[i] = ft_strdup(tab[i]);
-	ss[i] = ft_strdup(s);
-	free(tab);
-	return (ss);
-}
-
-void		re_draw_walls(int fd, t_wind wind, t_wall *w_coords, char **walls, t_coord map_offset)
+void		re_draw_walls(t_fd fd, t_wind wind, t_wall *w_coords, char **walls, t_coord map_offset)
 {
 	int		i;
 	t_line	line;
@@ -197,7 +150,7 @@ void		re_draw_walls(int fd, t_wind wind, t_wall *w_coords, char **walls, t_coord
 		ft_draw_line2(wind, w_coords[i].start, w_coords[i].end, line);
 }
 
-void		draw_select(int fd, t_wind wind, t_wall w_coords, t_coord map_offset)
+void		draw_select(t_fd fd, t_wind wind, t_wall w_coords, t_coord map_offset)
 {
 	t_line line;
 
@@ -206,19 +159,7 @@ void		draw_select(int fd, t_wind wind, t_wall w_coords, t_coord map_offset)
 	ft_draw_line2(wind, w_coords.start, w_coords.end, line);
 }
 
-char		*get_last_line(int fd)
-{
-	char *buf;
-	close (fd);
-	open("lines.txt", O_RDONLY);
-	while (get_next_line(fd, &buf))
-		ft_strdel(&buf);
-	close (fd);
-	fd = open("lines.txt", O_RDWR | O_APPEND);
-	return (buf);
-}
-
-char		**update_walls(char **walls, t_wall **w_coords, int fd, int flag)
+char		**update_walls(char **walls, t_wall **w_coords, t_fd fd, int flag)
 {
 	walls = read_lines(fd);
 	if (*w_coords)
@@ -227,16 +168,29 @@ char		**update_walls(char **walls, t_wall **w_coords, int fd, int flag)
 	return (walls);
 }
 
-void		write_l_coords(t_coord start, t_coord end, int fd, t_coord offset)
+void		write_l_coords(t_coord start, t_coord end, t_fd fd, t_coord offset)
 {
-	ft_putnbr_fd(start.x - offset.x, fd);
-	ft_putchar_fd('.', fd);
-	ft_putnbr_fd(start.y - offset.y, fd);
-	ft_putchar_fd(':', fd);
-	ft_putnbr_fd(end.x - offset.x, fd);
-	ft_putchar_fd('.', fd);
-	ft_putnbr_fd(end.y - offset.y, fd);
-	ft_putchar_fd('\n', fd);
+	t_coord ln_start;
+	t_coord ln_end;
+
+	ln_start.x = start.x - offset.x;
+	ln_start.y = start.y - offset.y;
+	ln_end.x = end.x - offset.x;
+	ln_end.y = end.y - offset.y;
+	double length;
+	length = sqrt(pow(end.x - start.x, 2) + pow(end.y - start.y , 2));
+	if (length < 4000 && length > 8)
+	{
+		ft_putnbr_fd(start.x - offset.x, fd.walls);
+		ft_putchar_fd('.', fd.walls);
+		ft_putnbr_fd(start.y - offset.y, fd.walls);
+		ft_putchar_fd(':', fd.walls);
+		ft_putnbr_fd(end.x - offset.x, fd.walls);
+		ft_putchar_fd('.', fd.walls);
+		ft_putnbr_fd(end.y - offset.y, fd.walls);
+		ft_putchar_fd('\n', fd.walls);
+		line_path(ln_start, ln_end, fd); 
+	}
 }
 
 int		in_line(t_coord mouse_pos, t_coord map_offset, t_wall w_coord)
@@ -401,29 +355,42 @@ int			check_select(int shift, int select, t_coord mouse_pos, char **wals, t_wall
 	return (select);
 }
 
-void		change_fd(int fd, t_wall *w_coords, char **walls, int *select, int *delete)
+void		change_squares(t_fd fd, t_wall *w_coords, char **walls)
 {
 	int i;
 
+	close(fd.squares);
+	fd.squares = open("squares.txt", O_RDWR | O_APPEND);
+	truncate ("squares.txt", 0);
+	close(fd.squares);
+	fd.squares = open("squares.txt", O_RDWR | O_APPEND);
+	i = -1;
+	while (++i < ft_tablen(walls))
+		line_path(w_coords[i].start, w_coords[i].end, fd);
+}
 
-	close(fd);
-	fd = open("lines.txt", O_RDWR | O_APPEND);
-	truncate("lines.txt", 0);
-	close(fd);
-	fd = open("lines.txt", O_RDWR | O_APPEND);
+void		change_fd(t_fd fd, t_wall *w_coords, char **walls, int *select, int *delete)
+{
+	int i;
+
+	close(fd.walls);
+	fd.walls = open("walls.txt", O_RDWR | O_APPEND);
+	truncate("walls.txt", 0);
+	close(fd.walls);
+	fd.walls = open("walls.txt", O_RDWR | O_APPEND);
 	i = -1;
 	while (++i < ft_tablen(walls))
 	{
 		if (!(*delete == 1 && i == *select))
 		{
-			ft_putnbr_fd(w_coords[i].start.x, fd);
-			ft_putchar_fd('.', fd);
-			ft_putnbr_fd(w_coords[i].start.y, fd);
-			ft_putchar_fd(':', fd);
-			ft_putnbr_fd(w_coords[i].end.x, fd);
-			ft_putchar_fd('.', fd);
-			ft_putnbr_fd(w_coords[i].end.y, fd);
-			ft_putchar_fd('\n', fd);
+			ft_putnbr_fd(w_coords[i].start.x, fd.walls);
+			ft_putchar_fd('.', fd.walls);
+			ft_putnbr_fd(w_coords[i].start.y, fd.walls);
+			ft_putchar_fd(':', fd.walls);
+			ft_putnbr_fd(w_coords[i].end.x, fd.walls);
+			ft_putchar_fd('.', fd.walls);
+			ft_putnbr_fd(w_coords[i].end.y, fd.walls);
+			ft_putchar_fd('\n', fd.walls);
 		}
 		if (*delete == 1 && i == *select)
 		{
@@ -433,7 +400,7 @@ void		change_fd(int fd, t_wall *w_coords, char **walls, int *select, int *delete
 	}
 }
 
-t_wall		*snap_all(char **walls, t_wall *w_coords, int fd)
+t_wall		*snap_all(char **walls, t_wall *w_coords, t_fd fd)
 {
 	int i;
 	int p;
@@ -454,7 +421,7 @@ t_wall		*snap_all(char **walls, t_wall *w_coords, int fd)
 	return (w_coords);
 }
 
-t_wall		*move_line(char **walls, t_wall *w_coords, t_coord mouse_pos, t_coord past_pos, int *select, t_coord map_offset, int fd, int *delete)
+t_wall		*move_line(char **walls, t_wall *w_coords, t_coord mouse_pos, t_coord past_pos, int *select, t_coord map_offset, t_fd fd, int *delete)
 {
 	t_coord movement;
 	t_coord zero;
@@ -498,15 +465,17 @@ int			main(int argc, char **argv)
 	t_coord		map_offset;
 	int			select;
 	t_coord		past_pos;
-	int			drawing;
-	int			fd;
+	t_fd		fd;
 	int			flag;
 	char		*buf;
 	int			bleh;
 	int			ctrl;
 	int			a;
+	int			drawing;
 	int			snap;
+	char		**map;
 	int			shift;
+	struct stat st = {0};
 	int			msbutton;
 	int			delete;
 	t_coord		start_line;
@@ -531,20 +500,25 @@ int			main(int argc, char **argv)
 	wind = init_wind(wind);
 	mouse_pos.x = 0;
 	mouse_pos.y = 0;
-	fd = open("lines.txt", O_CREAT | O_RDWR | O_APPEND);
-	if ((a = get_next_line(fd, &buf)) != -1 || a != 0)
+	if (argc != 2)
+		return (0);
+	if (stat(argv[1], &st) == -1)
+		    mkdir(argv[1], 0700);
+	fd.walls = open("walls.txt", O_CREAT | O_RDWR | O_APPEND, 0777);
+	if ((a = get_next_line(fd.walls, &buf)) != -1 || a != 0)
 	{
 		flag = 1;
 		walls = update_walls(walls, &w_coords, fd, flag);
 		re_draw_walls(fd, wind, w_coords, walls, map_offset);
 		if (select != -1)
 			draw_select(fd, wind, w_coords[select], map_offset);
-		close (fd);
-		fd = open("lines.txt", O_RDWR | O_APPEND);
+		close (fd.walls);
+		fd.walls = open("walls.txt", O_RDWR | O_APPEND);
 		ft_strdel(&buf);
 	}
-	close (fd);
-	fd = open("lines.txt", O_CREAT | O_RDWR | O_APPEND);
+	close (fd.walls);
+	fd.walls = open("walls.txt", O_CREAT | O_RDWR | O_APPEND, 0777);
+	fd.squares = open("squares.txt", O_CREAT | O_RDWR | O_APPEND, 0777);
 	while (1)
 	{
 		while (SDL_PollEvent(&wind.event))
@@ -558,7 +532,7 @@ int			main(int argc, char **argv)
 					draw_select(fd, wind, w_coords[select], map_offset);
 				if (check_key_down(wind, &ctrl, &drawing, &shift, select, w_coords, walls) == 0)
 				{
-					close(fd);
+					close(fd.walls);
 					return (0);
 				}
 			}
@@ -579,8 +553,8 @@ int			main(int argc, char **argv)
 					re_draw_walls(fd, wind, w_coords, walls, map_offset);
 					if (select != -1)
 						draw_select(fd, wind, w_coords[select], map_offset);
-					close (fd);
-					fd = open("lines.txt", O_RDWR | O_APPEND);
+					close (fd.walls);
+					fd.walls = open("walls.txt", O_RDWR | O_APPEND);
 				}
 				if (msbutton == 1 && shift == 0 && select != -1)
 				{
@@ -602,8 +576,8 @@ int			main(int argc, char **argv)
 						re_draw_walls(fd, wind, w_coords, walls, map_offset);
 						if (select != -1)
 							draw_select(fd, wind, w_coords[select], map_offset);
-						close (fd);
-						fd = open("lines.txt", O_RDWR | O_APPEND);
+						close (fd.walls);
+						fd.walls = open("walls.txt", O_RDWR | O_APPEND);
 					}
 				}
 			}
@@ -619,6 +593,9 @@ int			main(int argc, char **argv)
 			}
 			else if (wind.event.type == SDL_MOUSEBUTTONUP)
 			{
+				if (map)
+					ft_strdel(map);
+				map = create_map(fd, walls, w_coords, map);
 				msbutton = 0;
 				if (shift == 1)
 				{
@@ -641,6 +618,7 @@ int			main(int argc, char **argv)
 					if (select != -1)
 						draw_select(fd, wind, w_coords[select], map_offset);
 				}
+				change_squares(fd, w_coords, walls);
 				drawing = 0;
 				flag = 1;
 			}
@@ -672,8 +650,8 @@ int			main(int argc, char **argv)
 				re_draw_walls(fd, wind, w_coords, walls, map_offset);
 				if (select != -1)
 					draw_select(fd, wind, w_coords[select], map_offset);
-				close (fd);
-				fd = open("lines.txt", O_RDWR | O_APPEND);
+				close (fd.walls);
+				fd.walls = open("walls.txt", O_RDWR | O_APPEND);
 			}
 		}
 		SDL_UpdateWindowSurface(wind.window);
