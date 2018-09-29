@@ -6,7 +6,7 @@
 /*   By: dhorvill <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/09/08 21:27:55 by dhorvill          #+#    #+#             */
-/*   Updated: 2018/09/26 23:16:21 by dhorvill         ###   ########.fr       */
+/*   Updated: 2018/09/28 22:48:50 by dhorvill         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -500,10 +500,6 @@ int			main(int argc, char **argv)
 	wind = init_wind(wind);
 	mouse_pos.x = 0;
 	mouse_pos.y = 0;
-	if (argc != 2)
-		return (0);
-	if (stat(argv[1], &st) == -1)
-		    mkdir(argv[1], 0700);
 	fd.walls = open("walls.txt", O_CREAT | O_RDWR | O_APPEND, 0777);
 	if ((a = get_next_line(fd.walls, &buf)) != -1 || a != 0)
 	{
@@ -593,9 +589,6 @@ int			main(int argc, char **argv)
 			}
 			else if (wind.event.type == SDL_MOUSEBUTTONUP)
 			{
-				if (map)
-					ft_strdel(map);
-				map = create_map(fd, walls, w_coords, map);
 				msbutton = 0;
 				if (shift == 1)
 				{
@@ -621,6 +614,9 @@ int			main(int argc, char **argv)
 				change_squares(fd, w_coords, walls);
 				drawing = 0;
 				flag = 1;
+				if (map)
+					ft_strdel(map);
+				map = create_map(fd, walls, w_coords, map);
 			}
 			if (wind.event.type == SDL_KEYUP)
 				check_key_up(wind, &ctrl, &drawing, &shift, &delete, &snap);

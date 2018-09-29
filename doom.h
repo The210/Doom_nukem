@@ -6,7 +6,7 @@
 /*   By: dhorvill <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/09/08 21:23:19 by dhorvill          #+#    #+#             */
-/*   Updated: 2018/09/26 23:08:52 by dhorvill         ###   ########.fr       */
+/*   Updated: 2018/09/28 20:02:00 by dhorvill         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -158,6 +158,6 @@ int				in_liner(t_coord start, t_coord end, t_vector temp_coords);
 void			line_path(t_coord start, t_coord end, t_fd fd);
 t_wall			find_croners(char **walls, t_wall *w_coords, t_wall corner);
 char			**create_map(t_fd fd, char **wals, t_wall *w_coords, char **map);
-
+int				ft_iatoi(char *wall, int index);
 
 #endif

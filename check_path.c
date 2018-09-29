@@ -6,7 +6,7 @@
 /*   By: dhorvill <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/09/26 21:51:07 by dhorvill          #+#    #+#             */
-/*   Updated: 2018/09/26 22:11:05 by dhorvill         ###   ########.fr       */
+/*   Updated: 2018/09/28 20:27:20 by dhorvill         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,9 +40,11 @@ void			line_path(t_coord start, t_coord end, t_fd fd)
 	t_vector	temp_coord;
 	t_vector	temp;
 	t_coord		map_coord;
+	int			flag;
 
 	int i = 0;
 
+	flag = 0;
 	temp_coord.x = start.x;
 	temp_coord.y = start.y;
 	delta1.x = end.x - temp_coord.x;
@@ -52,12 +54,14 @@ void			line_path(t_coord start, t_coord end, t_fd fd)
 	{
 		while ((in_liner(start, end, temp_coord) == 1))
 		{
+			if (flag == 1)
+				ft_putchar_fd(':', fd.squares);
+			flag = 1;
 			map_coord.x = (temp_coord.x) / (SCREEN_HEIGHT / 75);
 			map_coord.y = (temp_coord.y) / (SCREEN_WIDTH / 75);
 			ft_putnbr_fd(map_coord.x, fd.squares);
 			ft_putchar_fd('.', fd.squares);
 			ft_putnbr_fd(map_coord.y, fd.squares);
-			ft_putchar_fd(':', fd.squares);
 			if (delta1.y > 0)
 				temp_coord.y += ((int)temp_coord.y % (SCREEN_HEIGHT / 75)) + (SCREEN_HEIGHT / 75);
 			if(delta1.y < 0)
@@ -69,12 +73,14 @@ void			line_path(t_coord start, t_coord end, t_fd fd)
 	{
 		while ((in_liner(start, end, temp_coord) == 1))
 		{
+			if (flag == 1)
+				ft_putchar_fd(':', fd.squares);
+			flag = 1;
 			map_coord.x = (temp_coord.x) / (SCREEN_HEIGHT / 75);
 			map_coord.y = (temp_coord.y) / (SCREEN_WIDTH / 75);
 			ft_putnbr_fd(map_coord.x, fd.squares);
 			ft_putchar_fd('.', fd.squares);
 			ft_putnbr_fd(map_coord.y, fd.squares);
-			ft_putchar_fd(':', fd.squares);
 			if (map_coord.x > 900)
 				break;
 			if (delta1.x < 0)

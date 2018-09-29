@@ -6,7 +6,7 @@
 /*   By: dhorvill <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/09/26 22:29:20 by dhorvill          #+#    #+#             */
-/*   Updated: 2018/09/28 19:23:28 by dhorvill         ###   ########.fr       */
+/*   Updated: 2018/09/28 21:16:10 by dhorvill         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -64,24 +64,46 @@ t_wall		find_corners(char **walls, t_wall *w_coords, t_wall corners)
 	return (corners);
 }
 
-char	**populate_map(char **squares, char **map, t_coord corners)
+char	**populate_map(char **squares, char **map, t_wall corners)
 {
 	int i;
 	int j;
-	int count;
+	int	x;
+	int	y;
+	int pol;
 
 	i = -1;
+	pol = 1;
 	while (squares[++i])
 	{
 		j = 0;
-		count = 0;
 		while (squares[i][j])
 		{
 			while (squares[i][j] && squares[i][j] != '-' && (squares[i][j] < '0' || squares[i][j] > '9'))
 				j++;
-			if (map[i][j]
+			pol = pol == 1 ? 0 : 1;
+			if (pol == 0)
+			{
+				x = ft_iatoi(squares[i], j);
+				x -= corners.start.x;
+			}
+			else
+			{
+				y = ft_iatoi(squares[i], j);
+				y -= corners.start.y;
+			}
+			while (squares[i][j] && ((squares[i][j] == '-') || (squares[i][j] >= '0' && squares[i][j] <= '9')))
+				j++;
+			if (pol == 1)
+			{
+				printf("dif.x: %i dif.y: %i\n",corners.start.x, corners.start.y);
+				printf("x: %i y: %i\n", x, y);
+			}
+			if (pol == 1 && x < corners.end.x - corners.start.x && y < corners.end.y - corners.start.y && map[y][x])
+				map[y][x] = '1';
 		}
 	}
+	return (map);
 }
 
 char	**create_map(t_fd fd, char **walls, t_wall *w_coords, char **map)
