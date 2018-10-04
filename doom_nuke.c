@@ -6,7 +6,7 @@
 /*   By: dhorvill <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/09/08 21:27:55 by dhorvill          #+#    #+#             */
-/*   Updated: 2018/09/28 22:48:50 by dhorvill         ###   ########.fr       */
+/*   Updated: 2018/10/02 18:14:47 by dhorvill         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -480,6 +480,7 @@ int			main(int argc, char **argv)
 	int			delete;
 	t_coord		start_line;
 	t_coord		end_line;
+	t_wall		corners;
 
 	drawing = 0;
 	flag = 0;
@@ -616,7 +617,12 @@ int			main(int argc, char **argv)
 				flag = 1;
 				if (map)
 					ft_strdel(map);
-				map = create_map(fd, walls, w_coords, map);
+				map = create_map(fd, walls, w_coords, map, &corners);
+				map = flood_all(map, corners);
+				int keke = -1;
+				while (map[++keke])
+					printf("%s\n", map[keke]);
+				ft_putchar('\n');
 			}
 			if (wind.event.type == SDL_KEYUP)
 				check_key_up(wind, &ctrl, &drawing, &shift, &delete, &snap);
