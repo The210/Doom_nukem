@@ -6,7 +6,7 @@
 /*   By: dhorvill <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/09/08 21:23:19 by dhorvill          #+#    #+#             */
-/*   Updated: 2018/10/01 20:45:42 by dhorvill         ###   ########.fr       */
+/*   Updated: 2018/10/04 21:20:34 by dhorvill         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -102,6 +102,12 @@ typedef struct	s_vector
 	double		x;
 	double		y;
 }				t_vector;
+
+typedef struct	s_dvector
+{
+	t_vector	start;
+	t_vector	end;
+}				t_dvector;
 
 typedef struct	s_special
 {
