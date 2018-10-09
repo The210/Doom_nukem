@@ -6,7 +6,7 @@
 /*   By: dhorvill <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/09/08 21:23:19 by dhorvill          #+#    #+#             */
-/*   Updated: 2018/10/04 21:20:34 by dhorvill         ###   ########.fr       */
+/*   Updated: 2018/10/08 22:28:26 by dhorvill         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,6 +38,7 @@ typedef struct	s_fd
 {
 	int			walls;
 	int			squares;
+	int			map;
 }				t_fd;
 
 typedef	struct	s_coord
@@ -166,5 +167,11 @@ t_wall			find_croners(char **walls, t_wall *w_coords, t_wall corner);
 char			**create_map(t_fd fd, char **wals, t_wall *w_coords, char **map, t_wall *corners);
 int				ft_iatoi(char *wall, int index);
 char			**flood_all(char **map, t_wall corners);
+void			write_map(t_fd, char **map);
+char			**readmap(char *argv);
+t_player		init_player(t_player player);
+t_wind			init_wind(t_wind wind);
+double			check_distance(t_player player, t_cast cast, t_wall *w_coords, char **map, char **walltxt);
+char			**update_walls(char **walls, t_wall **w_coords, t_fd fd, int flag);
 
 #endif

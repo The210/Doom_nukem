@@ -6,11 +6,21 @@
 /*   By: dhorvill <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/09/26 22:29:20 by dhorvill          #+#    #+#             */
-/*   Updated: 2018/10/02 18:13:19 by dhorvill         ###   ########.fr       */
+/*   Updated: 2018/10/08 19:41:41 by dhorvill         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "doom.h"
+
+void		write_map(t_fd fd, char **map)
+{
+	int	i;
+
+	truncate ("map.txt", 0);
+	i = -1;
+	while (map[++i])
+		ft_putendl_fd(map[i], fd.map);
+}
 
 char		**read_squares(t_fd fd)
 {

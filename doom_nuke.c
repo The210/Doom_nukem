@@ -6,7 +6,7 @@
 /*   By: dhorvill <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/09/08 21:27:55 by dhorvill          #+#    #+#             */
-/*   Updated: 2018/10/02 18:14:47 by dhorvill         ###   ########.fr       */
+/*   Updated: 2018/10/08 22:36:55 by dhorvill         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -452,7 +452,7 @@ t_wall		*move_line(char **walls, t_wall *w_coords, t_coord mouse_pos, t_coord pa
 	return (w_coords);
 }
 
-int			main(int argc, char **argv)
+/*int			main(int argc, char **argv)
 {
 	t_player	player;
 	t_wind		wind;
@@ -501,6 +501,7 @@ int			main(int argc, char **argv)
 	wind = init_wind(wind);
 	mouse_pos.x = 0;
 	mouse_pos.y = 0;
+	fd.map = open("map.txt", O_CREAT | O_RDWR | O_APPEND, 0777);
 	fd.walls = open("walls.txt", O_CREAT | O_RDWR | O_APPEND, 0777);
 	if ((a = get_next_line(fd.walls, &buf)) != -1 || a != 0)
 	{
@@ -619,10 +620,7 @@ int			main(int argc, char **argv)
 					ft_strdel(map);
 				map = create_map(fd, walls, w_coords, map, &corners);
 				map = flood_all(map, corners);
-				int keke = -1;
-				while (map[++keke])
-					printf("%s\n", map[keke]);
-				ft_putchar('\n');
+				write_map(fd, map);
 			}
 			if (wind.event.type == SDL_KEYUP)
 				check_key_up(wind, &ctrl, &drawing, &shift, &delete, &snap);
@@ -658,4 +656,4 @@ int			main(int argc, char **argv)
 		}
 		SDL_UpdateWindowSurface(wind.window);
 	}
-}
+}*/
