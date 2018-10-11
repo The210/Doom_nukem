@@ -6,7 +6,7 @@
 /*   By: dhorvill <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/09/08 21:23:19 by dhorvill          #+#    #+#             */
-/*   Updated: 2018/10/08 22:28:26 by dhorvill         ###   ########.fr       */
+/*   Updated: 2018/10/10 18:58:02 by dhorvill         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -171,7 +171,9 @@ void			write_map(t_fd, char **map);
 char			**readmap(char *argv);
 t_player		init_player(t_player player);
 t_wind			init_wind(t_wind wind);
-double			check_distance(t_player player, t_cast cast, t_wall *w_coords, char **map, char **walltxt);
+double			check_distance(t_player player, t_cast cast, t_wall *w_coords, char **map, char **walltxt, t_wall corners);
 char			**update_walls(char **walls, t_wall **w_coords, t_fd fd, int flag);
+char			**read_squares(t_fd fd);
+t_wall			*find_corners(char **walls, t_wall *w_coords, t_wall *corners);
 
 #endif

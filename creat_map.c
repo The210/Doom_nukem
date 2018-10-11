@@ -6,7 +6,7 @@
 /*   By: dhorvill <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/09/26 22:29:20 by dhorvill          #+#    #+#             */
-/*   Updated: 2018/10/08 19:41:41 by dhorvill         ###   ########.fr       */
+/*   Updated: 2018/10/10 18:53:21 by dhorvill         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -50,27 +50,29 @@ char		**read_squares(t_fd fd)
 t_wall		*find_corners(char **walls, t_wall *w_coords, t_wall *corners)
 {
 	int i;
+	t_wall scorners;
 
-	corners->start.x = w_coords[0].start.x;
-	corners->start.y = w_coords[0].start.y;
-	corners->end.x = w_coords[0].start.x;
-	corners->end.y = w_coords[0].start.y;
+	scorners.start.x = w_coords[0].start.x;
+	scorners.start.y = w_coords[0].start.y;
+	scorners.end.x = w_coords[0].start.x;
+	scorners.end.y = w_coords[0].start.y;
 	i = -1;
 	while (++i < ft_tablen(walls))
 	{
-		corners->start.x = corners->start.x > w_coords[i].start.x ? w_coords[i].start.x : corners->start.x;	
-		corners->start.x = corners->start.x > w_coords[i].end.x ? w_coords[i].end.x : corners->start.x;
-		corners->end.x = corners->end.x < w_coords[i].start.x ? w_coords[i].start.x : corners->end.x;
-		corners->end.x = corners->end.x < w_coords[i].end.x ? w_coords[i].end.x : corners->end.x;
-		corners->start.y = corners->start.y > w_coords[i].start.y ? w_coords[i].start.y : corners->start.y;	
-		corners->start.y = corners->start.y > w_coords[i].end.y ? w_coords[i].end.y : corners->start.y;
-		corners->end.y = corners->end.y < w_coords[i].start.y ? w_coords[i].start.y : corners->end.y;
-		corners->end.y = corners->end.y < w_coords[i].end.y ? w_coords[i].end.y : corners->end.y;
+		scorners.start.x = scorners.start.x > w_coords[i].start.x ? w_coords[i].start.x : scorners.start.x;	
+		scorners.start.x = scorners.start.x > w_coords[i].end.x ? w_coords[i].end.x : scorners.start.x;
+		scorners.end.x = scorners.end.x < w_coords[i].start.x ? w_coords[i].start.x : scorners.end.x;
+		scorners.end.x = scorners.end.x < w_coords[i].end.x ? w_coords[i].end.x : scorners.end.x;
+		scorners.start.y = scorners.start.y > w_coords[i].start.y ? w_coords[i].start.y : scorners.start.y;	
+		scorners.start.y = scorners.start.y > w_coords[i].end.y ? w_coords[i].end.y : scorners.start.y;
+		scorners.end.y = scorners.end.y < w_coords[i].start.y ? w_coords[i].start.y : scorners.end.y;
+		scorners.end.y = scorners.end.y < w_coords[i].end.y ? w_coords[i].end.y : scorners.end.y;
 	}
-	corners->start.x /= SCREEN_WIDTH / 75;
-	corners->start.y /= SCREEN_HEIGHT / 75;
-	corners->end.x /= SCREEN_WIDTH / 75;
-	corners->end.y /= SCREEN_HEIGHT / 75;
+	scorners.start.x /= SCREEN_WIDTH / 75;
+	scorners.start.y /= SCREEN_HEIGHT / 75;
+	scorners.end.x /= SCREEN_WIDTH / 75;
+	scorners.end.y /= SCREEN_HEIGHT / 75;
+	corners = &scorners;
 	return (corners);
 }
 
