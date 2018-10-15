@@ -6,7 +6,7 @@
 /*   By: dhorvill <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/10/08 19:49:09 by dhorvill          #+#    #+#             */
-/*   Updated: 2018/10/11 21:07:59 by dhorvill         ###   ########.fr       */
+/*   Updated: 2018/10/15 20:55:57 by dhorvill         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -48,6 +48,6 @@ t_player	init_player(t_player player)
 	player.angularspeed = 0.07;
 	player.speed = 0.1;
 	player.pos.x = 2.501;
-	player.pos.y = 2.501;
+	player.pos.y = 4.501;
 	return (player);
 }

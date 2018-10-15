@@ -6,7 +6,7 @@
 /*   By: dhorvill <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/10/04 20:47:04 by dhorvill          #+#    #+#             */
-/*   Updated: 2018/10/11 21:45:32 by dhorvill         ###   ########.fr       */
+/*   Updated: 2018/10/15 20:42:08 by dhorvill         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -163,9 +163,9 @@ double		check_distance(t_player player, t_cast cast, t_wall *w_coords, char **ma
 			ray.end.x = cast.x_pos;
 			ray.end.y = cast.y_pos;
 			med_result = intersect_point(ray, walls);
-			if (in_front(ray, cast, result) && in_wall(walls, result))// && in_segment(result, ray))
+			if (in_front(ray, cast, med_result) && in_wall(walls, med_result) && in_segment(result, ray))
 			{
-				distance = distance_calc(start, result);
+				distance = distance_calc(start, med_result);
 				if (flag == 0)
 				{
 					flag = 1;
@@ -194,9 +194,9 @@ double		check_distance(t_player player, t_cast cast, t_wall *w_coords, char **ma
 				ray.end.x = cast.x_pos;
 				ray.end.y = cast.y_pos;
 				med_result = intersect_point(ray, walls);
-				if (in_front(ray, cast, result) && in_wall(walls, result))// && in_segment(result, ray))
+				if (in_front(ray, cast, med_result) && in_wall(walls, med_result))// && in_segment(result, ray))
 				{
-					distance = distance_calc(start, result);
+					distance = distance_calc(start, med_result);
 					if (flag == 0)
 					{
 						flag = 1;
