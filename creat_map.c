@@ -6,7 +6,7 @@
 /*   By: dhorvill <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/09/26 22:29:20 by dhorvill          #+#    #+#             */
-/*   Updated: 2018/10/10 18:53:21 by dhorvill         ###   ########.fr       */
+/*   Updated: 2018/11/13 20:38:46 by dhorvill         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -47,7 +47,7 @@ char		**read_squares(t_fd fd)
 	return (walls);
 }
 
-t_wall		*find_corners(char **walls, t_wall *w_coords, t_wall *corners)
+t_wall		find_corners(char **walls, t_wall *w_coords)
 {
 	int i;
 	t_wall scorners;
@@ -72,8 +72,8 @@ t_wall		*find_corners(char **walls, t_wall *w_coords, t_wall *corners)
 	scorners.start.y /= SCREEN_HEIGHT / 75;
 	scorners.end.x /= SCREEN_WIDTH / 75;
 	scorners.end.y /= SCREEN_HEIGHT / 75;
-	corners = &scorners;
-	return (corners);
+	//corners = &scorners;
+	return (scorners);
 }
 
 char	**populate_map(char **squares, char **map, t_wall corners)
@@ -122,15 +122,17 @@ char	**create_map(t_fd fd, char **walls, t_wall *w_coords, char **map, t_wall *c
 	int		i;
 	int		j;
 	char	**squares;
+	t_wall	tmp_cor;
 
-	corners = find_corners(walls, w_coords, corners);
-	if ((map = (char**)malloc(sizeof(map) * (corners->end.y - corners->start.y + 1))) == 0)
+	tmp_cor = find_corners(walls, w_coords);
+	corners = &tmp_cor;
+	if ((map = (char**)malloc(sizeof(map) * (corners->end.y - corners->start.y + 2))) == 0)
 		return NULL;
 	map[corners->end.y - corners->start.y] = NULL;
 	i = -1;
 	while (++i < corners->end.y - corners->start.y)
 	{
-		if ((map[i] = (char*)malloc(sizeof(map[i]) * (corners->end.x - corners->start.x + 1))) == 0)
+		if ((map[i] = (char*)malloc(sizeof(map[i]) * (corners->end.x - corners->start.x + 2))) == 0)
 			return NULL;
 		map[i][corners->end.x - corners->start.x] = '\0';
 	}

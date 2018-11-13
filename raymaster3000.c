@@ -6,7 +6,7 @@
 /*   By: smerelo <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/10/04 20:53:48 by smerelo           #+#    #+#             */
-/*   Updated: 2018/10/11 22:08:43 by dhorvill         ###   ########.fr       */
+/*   Updated: 2018/11/11 21:38:35 by dhorvill         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,7 +45,7 @@ void		draw_column(t_wind wind, int height, int x)
 
 int			collision(int i, int j, char **map)
 {
-	if (j < 0 || i < 0 || (map[j][i] >= 'A' && map[j][i] <= 'Z') || map[j][i] == '+' || map[j][i] == '1')
+	if (j < 0 || i < 0 || !(map[j][i]) || (map[j][i] >= 'A' && map[j][i] <= 'Z') || map[j][i] == '+' || map[j][i] == '1')
 		return (1);
 	else
 		return (0);
@@ -113,19 +113,19 @@ void		rays(t_player player, char **map, t_wall *w_coords, char **walltxt, t_wind
 	t_cast	second_cast;
 
 	i = -(SCREEN_WIDTH / 2);
-		while (++i < SCREEN_WIDTH / 2)
+		while (++i < (SCREEN_WIDTH / 2))
 		{
-			height = 0;
+			height = -1;
 			player.ray.x = player.dir.x + (player.plane.x * -i / (SCREEN_WIDTH / 2));
 			player.ray.y = player.dir.y + (player.plane.y * -i / (SCREEN_WIDTH / 2));
 			init_cast(&second_cast, player);
-			while (height == 0)
+			while (height == -1)
 			{
 			//	printf("cast.i : %i  cast.j : %i\n", second_cast.i, second_cast.j);
 				second_cast = raycast(player, map, &second_cast);
-				height = (0.25 * (double)((double)SCREEN_WIDTH / (double) SCREEN_HEIGHT) * check_distance(player, second_cast, w_coords, map, walltxt, corners));
-				//if (height != 0)
-				//	printf("height: %i\n", height);
+				height = (1 * (double)((double)SCREEN_WIDTH / (double) SCREEN_HEIGHT) * check_distance(player, second_cast, w_coords, map, walltxt, corners));
+				//if (height != -1)
+					printf("height: %i\n", height);
 				second_cast.dx= player.ray.x > 0 ? floor(second_cast.x_pos) + 1 - second_cast.x_pos :
 				ceil(second_cast.x_pos) - 1 - second_cast.x_pos;
 				second_cast.dy = player.ray.y > 0 ? floor(second_cast.y_pos) + 1 - second_cast.y_pos :
@@ -138,7 +138,7 @@ void		rays(t_player player, char **map, t_wall *w_coords, char **walltxt, t_wind
 		SDL_UpdateWindowSurface(wind.window);
 }
 
-int			main(int argc, char **argv)
+/*int			main(int argc, char **argv)
 {
 	t_player	player;
 	t_wind		wind;
@@ -204,4 +204,4 @@ int			main(int argc, char **argv)
 			rays(player, map, w_coords, walls, wind, scorners);
 		}
 	}
-}
+}*/

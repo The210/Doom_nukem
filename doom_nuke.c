@@ -6,7 +6,7 @@
 /*   By: dhorvill <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/09/08 21:27:55 by dhorvill          #+#    #+#             */
-/*   Updated: 2018/10/08 22:36:55 by dhorvill         ###   ########.fr       */
+/*   Updated: 2018/11/13 19:00:35 by dhorvill         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -452,7 +452,7 @@ t_wall		*move_line(char **walls, t_wall *w_coords, t_coord mouse_pos, t_coord pa
 	return (w_coords);
 }
 
-/*int			main(int argc, char **argv)
+int			main(int argc, char **argv)
 {
 	t_player	player;
 	t_wind		wind;
@@ -491,8 +491,8 @@ t_wall		*move_line(char **walls, t_wall *w_coords, t_coord mouse_pos, t_coord pa
 	line.offset.x = 0;
 	line.offset.y = 0;
 	offset.x = 0;
-	line.color = 0xffffff;
 	offset.y = 0;
+	line.color = 0xffffff;
 	map_offset.x = 0;
 	map_offset.y = 0;
 	ctrl = 0;
@@ -507,6 +507,7 @@ t_wall		*move_line(char **walls, t_wall *w_coords, t_coord mouse_pos, t_coord pa
 	{
 		flag = 1;
 		walls = update_walls(walls, &w_coords, fd, flag);
+		draw_grid(wind, mouse_pos, offset);
 		re_draw_walls(fd, wind, w_coords, walls, map_offset);
 		if (select != -1)
 			draw_select(fd, wind, w_coords[select], map_offset);
@@ -524,7 +525,7 @@ t_wall		*move_line(char **walls, t_wall *w_coords, t_coord mouse_pos, t_coord pa
 			if (wind.event.type == SDL_KEYDOWN)
 			{
 				SDL_FillRect(wind.screen, NULL, 0x000000);
-				draw_grid(wind, mouse_pos, offset, map_offset);
+				draw_grid(wind, mouse_pos, offset);
 				re_draw_walls(fd, wind, w_coords, walls, map_offset);
 				if (select != -1)
 					draw_select(fd, wind, w_coords[select], map_offset);
@@ -547,7 +548,7 @@ t_wall		*move_line(char **walls, t_wall *w_coords, t_coord mouse_pos, t_coord pa
 					offset.y -= mouse_pos.y - past_pos.y;
 					map_offset.x += mouse_pos.x - past_pos.x;
 					map_offset.y += mouse_pos.y - past_pos.y;
-					draw_grid(wind, mouse_pos, offset, map_offset);
+					draw_grid(wind, mouse_pos, offset);
 					re_draw_walls(fd, wind, w_coords, walls, map_offset);
 					if (select != -1)
 						draw_select(fd, wind, w_coords[select], map_offset);
@@ -557,7 +558,7 @@ t_wall		*move_line(char **walls, t_wall *w_coords, t_coord mouse_pos, t_coord pa
 				if (msbutton == 1 && shift == 0 && select != -1)
 				{
 					SDL_FillRect(wind.screen, NULL, 0x000000);
-					draw_grid(wind, mouse_pos, offset, map_offset);
+					draw_grid(wind, mouse_pos, offset);
 					w_coords = move_line(walls, w_coords, mouse_pos, past_pos, &select, map_offset, fd, &delete);
 					walls = update_walls(walls, &w_coords, fd, flag);
 					re_draw_walls(fd, wind, w_coords, walls, map_offset);
@@ -567,7 +568,7 @@ t_wall		*move_line(char **walls, t_wall *w_coords, t_coord mouse_pos, t_coord pa
 				if (drawing == 1)
 				{
 					SDL_FillRect(wind.screen, NULL, 0x000000);
-					draw_grid(wind, mouse_pos, offset, map_offset);
+					draw_grid(wind, mouse_pos, offset);
 					if (flag == 1)
 					{
 						walls = update_walls(walls, &w_coords, fd, flag);
@@ -596,7 +597,7 @@ t_wall		*move_line(char **walls, t_wall *w_coords, t_coord mouse_pos, t_coord pa
 				{
 					walls = update_walls(walls, &w_coords, fd, flag);
 					SDL_FillRect(wind.screen, NULL, 0x000000);
-					draw_grid(wind, mouse_pos, offset, map_offset);
+					draw_grid(wind, mouse_pos, offset);
 					re_draw_walls(fd, wind, w_coords, walls, map_offset);
 					if (select != -1)
 						draw_select(fd, wind, w_coords[select], map_offset);
@@ -608,7 +609,7 @@ t_wall		*move_line(char **walls, t_wall *w_coords, t_coord mouse_pos, t_coord pa
 					write_l_coords(start_line, end_line, fd, map_offset);
 					walls = update_walls(walls, &w_coords, fd, flag);
 					SDL_FillRect(wind.screen, NULL, 0x000000);
-					draw_grid(wind, mouse_pos, offset, map_offset);
+					draw_grid(wind, mouse_pos, offset);
 					re_draw_walls(fd, wind, w_coords, walls, map_offset);
 					if (select != -1)
 						draw_select(fd, wind, w_coords[select], map_offset);
@@ -629,7 +630,7 @@ t_wall		*move_line(char **walls, t_wall *w_coords, t_coord mouse_pos, t_coord pa
 				w_coords = snap_all(walls, w_coords, fd);
 				walls = update_walls(walls, &w_coords, fd, flag);
 				SDL_FillRect(wind.screen, NULL, 0x000000);
-				draw_grid(wind, mouse_pos, offset, map_offset);
+				draw_grid(wind, mouse_pos, offset);
 				re_draw_walls(fd, wind, w_coords, walls, map_offset);
 				if (select != -1)
 					draw_select(fd, wind, w_coords[select], map_offset);
@@ -642,7 +643,7 @@ t_wall		*move_line(char **walls, t_wall *w_coords, t_coord mouse_pos, t_coord pa
 		if (bleh == 0 || bleh == 2)
 		{
 			bleh = 1;
-			draw_grid(wind, mouse_pos, offset, map_offset);
+			draw_grid(wind, mouse_pos, offset);
 			if (bleh == 2)
 			{
 				flag = 1;
@@ -656,4 +657,4 @@ t_wall		*move_line(char **walls, t_wall *w_coords, t_coord mouse_pos, t_coord pa
 		}
 		SDL_UpdateWindowSurface(wind.window);
 	}
-}*/
+}

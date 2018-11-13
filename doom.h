@@ -6,7 +6,7 @@
 /*   By: dhorvill <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/09/08 21:23:19 by dhorvill          #+#    #+#             */
-/*   Updated: 2018/10/10 18:58:02 by dhorvill         ###   ########.fr       */
+/*   Updated: 2018/11/13 21:01:04 by dhorvill         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,8 +17,9 @@
 # include "SDL.h"
 # include "libft.h"
 # include "get_next_line.h"
-#include <sys/types.h>
-#include <sys/stat.h>
+# include "tga.h"
+# include <sys/types.h>
+# include <sys/stat.h>
 
 # define SCREEN_HEIGHT 1250
 # define SCREEN_WIDTH 1250
@@ -160,7 +161,7 @@ Uint32			get_pixel(SDL_Surface *surface, int x, int y);
 t_line			mdy(t_wind wind, t_coord point, t_coord next_point, t_line line);
 t_line			mdx(t_wind wind, t_coord point, t_coord next_point, t_line line);
 int				ft_draw_line2(t_wind wind, t_coord point, t_coord next_point, t_line line);
-void			draw_grid(t_wind wind, t_coord mouse_pos, t_coord offset, t_coord map_offset);
+void			draw_grid(t_wind wind, t_coord mouse_pos, t_coord offset);
 int				in_liner(t_coord start, t_coord end, t_vector temp_coords);
 void			line_path(t_coord start, t_coord end, t_fd fd);
 t_wall			find_croners(char **walls, t_wall *w_coords, t_wall corner);
@@ -174,6 +175,6 @@ t_wind			init_wind(t_wind wind);
 double			check_distance(t_player player, t_cast cast, t_wall *w_coords, char **map, char **walltxt, t_wall corners);
 char			**update_walls(char **walls, t_wall **w_coords, t_fd fd, int flag);
 char			**read_squares(t_fd fd);
-t_wall			*find_corners(char **walls, t_wall *w_coords, t_wall *corners);
+t_wall			find_corners(char **walls, t_wall *w_coords);
 
 #endif

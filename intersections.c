@@ -6,7 +6,7 @@
 /*   By: dhorvill <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/10/04 20:47:04 by dhorvill          #+#    #+#             */
-/*   Updated: 2018/10/15 20:42:08 by dhorvill         ###   ########.fr       */
+/*   Updated: 2018/11/07 21:39:43 by dhorvill         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -62,23 +62,30 @@ int			in_front(t_dvector ray, t_cast cast, t_vector result)
 
 	dir.x = result.x - ray.start.x > 0 ? 1 : -1;
 	dir.y = result.y - ray.start.y > 0 ? 1 : -1;
-	if (cast.x_step != dir.x || cast.y_step != dir.y)
+	return (!(cast.x_step != dir.x || cast.y_step != dir.y));
+/*	if (cast.x_step != dir.x || cast.y_step != dir.y)
 		return (0);
 	else
-		return (1);
+		return (1);*/
 
 }
 
-int			in_segment(t_vector result, t_dvector ray)
+/*int			in_segment(t_vector result, t_dvector ray)
 {
 	double		to_point;
 	double		to_end;
 
 	to_point = distance_calc(ray.start, result);
 	to_end = distance_calc(ray.start, ray.end) + sqrt(2);
-	if (to_point <= to_end)
-		printf("does segment\n");
+	//if (to_point <= to_end)
+	//	printf("does segment\n");
 	return (to_point <= to_end);
+}*/
+
+int			in_segment(t_vector result, t_cast cast)
+{
+	//printf("result.x: %f result.y: %f cast.i :%i cast.j %i\n", result.x, result.y, cast.i, cast.j);
+	return (result.x >= cast.i && result.x <= cast.i + 1 && result.y >= cast.j && result.y <= cast.j + 1);
 }
 
 int			in_wall(t_dvector wall, t_vector result)
@@ -147,8 +154,9 @@ double		check_distance(t_player player, t_cast cast, t_wall *w_coords, char **ma
 	start.y = player.pos.y;
 	square.x = cast.x_pos;
 	square.y = cast.y_pos;
+	printf("ENTERSESNJDNAWJNSDJNAJDNJA\n\n\n\n\n");
 	shorter_distance = -1;
-//	printf("map thing : %c\n", map[cast.j][cast.i]);
+	printf("cast.j: %i cast.i: %i map[cast.j][cast.i]: %c\n", cast.j, cast.i, map[cast.j][cast.i]);
 	if (cast.j >= 0 && cast.i >= 0 && map[cast.j][cast.i] && map[cast.j][cast.i] == '+')
 	{
 		index = -1;
@@ -163,7 +171,10 @@ double		check_distance(t_player player, t_cast cast, t_wall *w_coords, char **ma
 			ray.end.x = cast.x_pos;
 			ray.end.y = cast.y_pos;
 			med_result = intersect_point(ray, walls);
-			if (in_front(ray, cast, med_result) && in_wall(walls, med_result) && in_segment(result, ray))
+			printf("ray.end.x: %f ray.end.y %f\n walls.start.x: %f walls.start.y: %f walls.end.x: %f walls.end.y: %f", ray.end.x, ray.end.y, walls.start.x, walls.start.y, walls.end.x, walls.end.y); 
+			printf("med_result.x: %f, med__result.y %f\n", med_result.x, med_result.y);
+		//	printf("cast.i: %i cast.j: %i\n", cast.i, cast.j);
+			if (in_segment(med_result, cast) && in_front(ray, cast, med_result) && in_wall(walls, med_result))
 			{
 				distance = distance_calc(start, med_result);
 				if (flag == 0)
@@ -183,7 +194,7 @@ double		check_distance(t_player player, t_cast cast, t_wall *w_coords, char **ma
 		index = map[cast.j][cast.i] - 65;
 		while (index < ft_tablen(walltxt))
 		{
-			if (index % (map[cast.j][cast.i] - 65) == 0)
+			if ((index % 26) == (map[cast.j][cast.i] - 65))
 			{
 				walls.start.x = ((double)w_coords[index].start.x - (double)corners.start.x) / (double)(SCREEN_WIDTH / 75);
 				walls.start.y = ((double)w_coords[index].start.y - (double)corners.start.y) / (double)(SCREEN_HEIGHT / 75);
@@ -191,10 +202,14 @@ double		check_distance(t_player player, t_cast cast, t_wall *w_coords, char **ma
 				walls.end.y = ((double)w_coords[index].end.y - (double)corners.start.y) / (double)(SCREEN_HEIGHT / 75);
 				ray.start.x = player.pos.x;
 				ray.start.y = player.pos.y;
-				ray.end.x = cast.x_pos;
-				ray.end.y = cast.y_pos;
+				ray.end.x = cast.x_pos; //possible error
+				ray.end.y = cast.y_pos; // possible error
 				med_result = intersect_point(ray, walls);
-				if (in_front(ray, cast, med_result) && in_wall(walls, med_result))// && in_segment(result, ray))
+				printf("index: %i\n", index);
+			printf("ray.end.x: %f ray.end.y %f\n walls.start.x: %f walls.start.y: %f walls.end.x: %f walls.end.y: %f\n", ray.end.x, ray.end.y, walls.start.x, walls.start.y, walls.end.x, walls.end.y); 
+			printf("med_result.x: %f, med_result.y %f\n", med_result.x, med_result.y);
+				printf("cast.i: %i cast.j: %i\n", cast.i, cast.j);
+				if (in_segment(med_result, cast) && in_front(ray, cast, med_result) && in_wall(walls, med_result))
 				{
 					distance = distance_calc(start, med_result);
 					if (flag == 0)
@@ -211,13 +226,20 @@ double		check_distance(t_player player, t_cast cast, t_wall *w_coords, char **ma
 		}
 	}
 	else
+	{
+		printf("Whaaaaaaaaaat?!\n");
 		return (0);
+	}
+	//printf("cast.j :%i cast.i: %i\n", cast.j, cast.i);
+	//printf("map thing : %c\n", map[cast.j][cast.i]);
+	//printf("shorter_distance: %f\n", shorter_distance);
 //	if (shorter_distance <= (distance_calc(start, square)) + 2 && shorter_distance != -1)
-		return (SCREEN_HEIGHT / (fabs(player.dir.x * (result.x - player.pos.x) + player.dir.y * (result.y - player.pos.y))));
+	//	return (SCREEN_HEIGHT / (fabs(player.dir.x * (result.x - player.pos.x) + player.dir.y * (result.y - player.pos.y))));
 //	else
 //	{
 		//		printf("BLEH");
 //		return (-1);
 //	}
-//		return (shorter_distance);
+	//	printf("shorter_distance: %f\n", shorter_distance);
+		return (shorter_distance);
 }
