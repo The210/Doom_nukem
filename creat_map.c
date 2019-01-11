@@ -42,8 +42,6 @@ char		**read_squares(t_fd fd)
 		ft_putendl("error");
 		return (NULL);
 	}
-	if (str)
-		ft_strdel(&str);
 	return (walls);
 }
 
@@ -68,10 +66,10 @@ t_wall		find_corners(char **walls, t_wall *w_coords)
 		scorners.end.y = scorners.end.y < w_coords[i].start.y ? w_coords[i].start.y : scorners.end.y;
 		scorners.end.y = scorners.end.y < w_coords[i].end.y ? w_coords[i].end.y : scorners.end.y;
 	}
-	scorners.start.x /= SCREEN_WIDTH / 75;
-	scorners.start.y /= SCREEN_HEIGHT / 75;
-	scorners.end.x /= SCREEN_WIDTH / 75;
-	scorners.end.y /= SCREEN_HEIGHT / 75;
+	scorners.start.x /= SCREEN_WIDTH / 50;
+	scorners.start.y /= SCREEN_HEIGHT / 50;
+	scorners.end.x /= SCREEN_WIDTH / 50;
+	scorners.end.y /= SCREEN_HEIGHT / 50;
 	//corners = &scorners;
 	return (scorners);
 }
@@ -115,6 +113,53 @@ char	**populate_map(char **squares, char **map, t_wall corners)
 		}
 	}
 	return (map);
+}
+
+void	write_edges(t_wall *corners, t_fd fd)
+{
+	t_wall	off_corner;
+
+	off_corner.start.x = corners->start.x;
+	off_corner.start.y = corners->end.y;
+	off_corner.end.x = corners->end.x;
+	off_corner.end.y = corners->start.y;
+	fd.walls = open( "walls.txt", O_RDWR | O_APPEND);
+	ft_putnbr_fd(corners->start.x, fd.walls);
+	ft_putchar_fd('.', fd.walls);
+	ft_putnbr_fd(corners->start.y, fd.walls);
+	ft_putchar_fd(':', fd.walls);
+	ft_putnbr_fd(corners->end.x, fd.walls);
+	ft_putchar_fd('.', fd.walls);
+	ft_putnbr_fd(corners->start.y, fd.walls);
+	ft_putchar_fd('\n', fd.walls);
+	ft_putnbr_fd(corners->start.x, fd.walls);
+	ft_putchar_fd('.', fd.walls);
+	ft_putnbr_fd(corners->start.y, fd.walls);
+	ft_putchar_fd(':', fd.walls);
+	ft_putnbr_fd(corners->start.x, fd.walls);
+	ft_putchar_fd('.', fd.walls);
+	ft_putnbr_fd(corners->end.y, fd.walls);
+	ft_putchar_fd('\n', fd.walls);
+	ft_putnbr_fd(corners->start.x, fd.walls);
+	ft_putchar_fd('.', fd.walls);
+	ft_putnbr_fd(corners->end.y, fd.walls);
+	ft_putchar_fd(':', fd.walls);
+	ft_putnbr_fd(corners->end.x, fd.walls);
+	ft_putchar_fd('.', fd.walls);
+	ft_putnbr_fd(corners->end.y, fd.walls);
+	ft_putchar_fd('\n', fd.walls);
+	ft_putnbr_fd(corners->end.x, fd.walls);
+	ft_putchar_fd('.', fd.walls);
+	ft_putnbr_fd(corners->start.y, fd.walls);
+	ft_putchar_fd(':', fd.walls);
+	ft_putnbr_fd(corners->end.x, fd.walls);
+	ft_putchar_fd('.', fd.walls);
+	ft_putnbr_fd(corners->end.y, fd.walls);
+	ft_putchar_fd('\n', fd.walls);
+	line_path(corners->start, off_corner.end, fd);
+	line_path(corners->start, off_corner.start, fd);
+	line_path(off_corner.start, corners->end, fd);
+	line_path(corners->end, off_corner.end, fd);
 }
 
 char	**create_map(t_fd fd, char **walls, t_wall *w_coords, char **map, t_wall *corners)

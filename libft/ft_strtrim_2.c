@@ -35,6 +35,8 @@ char	*ft_strtrim_2(char *s, char c)
 			while (i <= j)
 				ss[++k] = s[++i];
 			ss[k] = '\0';
+			if(s)
+				ft_strdel(&s);
 			return (ss);
 		}
 	}

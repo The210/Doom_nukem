@@ -6,7 +6,7 @@
 /*   By: dhorvill <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/10/08 19:49:09 by dhorvill          #+#    #+#             */
-/*   Updated: 2018/11/07 20:41:59 by dhorvill         ###   ########.fr       */
+/*   Updated: 2018/11/14 21:40:56 by smerelo          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,22 +32,22 @@ char		**readmap(char *argv)
 	{
 		ft_putendl("Error: invalid file");
 		return (NULL);
-	}
+	}/* 
 	if (str)
-		ft_strdel(&str);
+		ft_strdel(&str); */
 	return (map);
 }
 
 t_player	init_player(t_player player)
 {
 	player.error = 0;
-	player.dir.x = 0;
-	player.dir.y = 1;
+	player.dir.x = 1;
+	player.dir.y = 0;
 	player.plane.x = player.dir.y;
 	player.plane.y = -player.dir.x;
 	player.angularspeed = 0.07;
-	player.speed = 0.1;
-	player.pos.x = 7.501;
-	player.pos.y = 5.501;
+	player.speed = 0.5;
+	player.pos.x = 5.2;
+	player.pos.y = 2.2;	
 	return (player);
 }

@@ -6,7 +6,7 @@
 /*   By: dhorvill <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/09/26 21:51:07 by dhorvill          #+#    #+#             */
-/*   Updated: 2018/10/01 20:17:48 by dhorvill         ###   ########.fr       */
+/*   Updated: 2018/12/01 00:47:11 by smerelo          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -55,15 +55,15 @@ void			line_path(t_coord start, t_coord end, t_fd fd)
 			if (flag != 0)
 				ft_putchar_fd(':', fd.squares);
 			flag = 1;
-			map_coord.x = (temp_coord.x) / (SCREEN_HEIGHT / 75);
-			map_coord.y = (temp_coord.y) / (SCREEN_WIDTH / 75);
+			map_coord.x = (temp_coord.x) / (SCREEN_HEIGHT / 50);
+			map_coord.y = (temp_coord.y) / (SCREEN_WIDTH / 50);
 			ft_putnbr_fd(map_coord.x, fd.squares);
 			ft_putchar_fd('.', fd.squares);
 			ft_putnbr_fd(map_coord.y, fd.squares);
 			if (delta1.y > 0)
-				temp_coord.y = temp_coord.y - ((int)temp_coord.y % (SCREEN_HEIGHT / 75)) + (SCREEN_HEIGHT / 75);
+				temp_coord.y = temp_coord.y - ((int)temp_coord.y % (SCREEN_HEIGHT / 50)) + (SCREEN_HEIGHT / 50);
 			if(delta1.y < 0)
-				temp_coord.y = temp_coord.y + ((-(int)temp_coord.y) % (SCREEN_HEIGHT / 75)) - (SCREEN_HEIGHT / 75);
+				temp_coord.y = temp_coord.y + ((-(int)temp_coord.y) % (SCREEN_HEIGHT / 50)) - (SCREEN_HEIGHT / 50);
 		}
 	}
 	else
@@ -73,21 +73,21 @@ void			line_path(t_coord start, t_coord end, t_fd fd)
 			if (flag == 1)
 				ft_putchar_fd(':', fd.squares);
 			flag = 1;
-			map_coord.x = (temp_coord.x) / (SCREEN_HEIGHT / 75);
-			map_coord.y = (temp_coord.y) / (SCREEN_WIDTH / 75);
+			map_coord.x = (temp_coord.x) / (SCREEN_HEIGHT / 50);
+			map_coord.y = (temp_coord.y) / (SCREEN_WIDTH / 50);
 			ft_putnbr_fd(map_coord.x, fd.squares);
 			ft_putchar_fd('.', fd.squares);
 			ft_putnbr_fd(map_coord.y, fd.squares);
 			if (map_coord.x > 900)
 				break;
 			if (delta1.x < 0)
-				temp.x = temp_coord.x + ((-(int)temp_coord.x) % (SCREEN_WIDTH / 75)) - (SCREEN_WIDTH / 75);
+				temp.x = temp_coord.x + ((-(int)temp_coord.x) % (SCREEN_WIDTH / 50)) - (SCREEN_WIDTH / 50);
 			if (delta1.x > 0)
-				temp.x = temp_coord.x - ((int)temp_coord.x % (SCREEN_WIDTH / 75)) + (SCREEN_WIDTH / 75);
+				temp.x = temp_coord.x - ((int)temp_coord.x % (SCREEN_WIDTH / 50)) + (SCREEN_WIDTH / 50);
 			if (delta1.y < 0)
-				temp.y = temp_coord.y + ((-(int)temp_coord.y) % (SCREEN_HEIGHT / 75)) - (SCREEN_HEIGHT / 75);
+				temp.y = temp_coord.y + ((-(int)temp_coord.y) % (SCREEN_HEIGHT / 50)) - (SCREEN_HEIGHT / 50);
 			if (delta1.y > 0)
-				temp.y = temp_coord.y - ((int)temp_coord.y % (SCREEN_HEIGHT / 75)) + (SCREEN_HEIGHT / 75);
+				temp.y = temp_coord.y - ((int)temp_coord.y % (SCREEN_HEIGHT / 50)) + (SCREEN_HEIGHT / 50);
 			delta2.y = temp.y - temp_coord.y;
 			delta2.x = temp.x - temp_coord.x;
 			if ((fabs(fabs(delta2.y / delta2.x) - fabs(slope))) < 0.000001)

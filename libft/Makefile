@@ -35,7 +35,7 @@ ft_memcmp.o ft_putchar.o ft_putchar_fd.o ft_putstr.o ft_putendl.o ft_putstr_fd.o
 
 all: $(NAME)
 $(NAME):
-	gcc -Wall -Werror -Wextra -c -I $(HEADER) $(SRCS)
+	gcc -Wall -Werror -Wextra -c -I -g $(HEADER) $(SRCS)
 	ar rc $(NAME) $(OBJ)
 clean:
 	/bin/rm -f $(OBJ)

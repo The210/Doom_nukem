@@ -6,7 +6,7 @@
 /*   By: dhorvill <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/09/08 21:23:19 by dhorvill          #+#    #+#             */
-/*   Updated: 2018/11/13 21:01:04 by dhorvill         ###   ########.fr       */
+/*   Updated: 2018/12/01 00:47:14 by smerelo          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,15 +14,16 @@
 #ifndef DOOM_H
 # define DOOM_H
 
-# include "SDL.h"
+# include "SDL2/SDL.h"
+//# include "SDL_ttf.h"
 # include "libft.h"
 # include "get_next_line.h"
 # include "tga.h"
 # include <sys/types.h>
 # include <sys/stat.h>
 
-# define SCREEN_HEIGHT 1250
-# define SCREEN_WIDTH 1250
+# define SCREEN_HEIGHT 800
+# define SCREEN_WIDTH 800
 # define TEXTURE 500
 
 typedef struct	s_pixels
@@ -35,18 +36,27 @@ typedef struct	s_pixels
 	Uint8		b;
 }				t_pixel;
 
+typedef struct	s_coord
+{
+	int x;
+	int y;
+}				t_coord;
+
 typedef struct	s_fd
 {
 	int			walls;
 	int			squares;
 	int			map;
+	int			buttonss;
 }				t_fd;
 
-typedef	struct	s_coord
+typedef	struct	s_rect
 {
 	int			x;
 	int			y;
-}				t_coord;
+	int			x2;
+	int			y2;
+}				t_rect;
 
 typedef	struct	s_line
 {
@@ -62,12 +72,25 @@ typedef	struct	s_line
 	t_coord		offset;
 }				t_line;
 
+typedef struct	s_vector
+{
+	double		x;
+	double		y;
+}				t_vector;
+
 typedef struct	s_wall
 {
 	t_coord		start;
 	t_coord		end;
 	int			error;
 }				t_wall;
+
+typedef struct	s_gwall
+{
+	t_vector			start;
+	t_vector			end;
+	int						error;
+}								t_gwall;
 
 typedef struct	s_cast
 {
@@ -99,11 +122,6 @@ typedef struct	s_misc
 
 }				t_misc;
 
-typedef struct	s_vector
-{
-	double		x;
-	double		y;
-}				t_vector;
 
 typedef struct	s_dvector
 {
@@ -156,12 +174,24 @@ typedef struct	s_texture
 	SDL_Surface	*door;
 }				t_texture;
 
+typedef struct	s_button
+{
+	int				pos_x;
+	int				pos_y;
+	double			size;
+	char			*name;
+	int				len;
+	unsigned int	*img;
+	int				select;
+}				t_button;
+
+
 void			put_pixel32(SDL_Surface *surface, int x, int y, Uint32 pixel);
 Uint32			get_pixel(SDL_Surface *surface, int x, int y);
 t_line			mdy(t_wind wind, t_coord point, t_coord next_point, t_line line);
 t_line			mdx(t_wind wind, t_coord point, t_coord next_point, t_line line);
 int				ft_draw_line2(t_wind wind, t_coord point, t_coord next_point, t_line line);
-void			draw_grid(t_wind wind, t_coord mouse_pos, t_coord offset);
+void			draw_grid(t_wind wind, t_coord offset);
 int				in_liner(t_coord start, t_coord end, t_vector temp_coords);
 void			line_path(t_coord start, t_coord end, t_fd fd);
 t_wall			find_croners(char **walls, t_wall *w_coords, t_wall corner);
@@ -176,5 +206,27 @@ double			check_distance(t_player player, t_cast cast, t_wall *w_coords, char **m
 char			**update_walls(char **walls, t_wall **w_coords, t_fd fd, int flag);
 char			**read_squares(t_fd fd);
 t_wall			find_corners(char **walls, t_wall *w_coords);
+void			buttons(t_button button, t_fd fd);
+unsigned int 	*resize(unsigned int *pixels, t_tga specs, double size);
+t_button		fill_button(t_button button);
+void			display_img(t_button button, t_wind wind);
+t_button		*fill_all(t_fd fd);
+void			display_buttons(t_button *buttons, t_wind wind);
+int				in_button_d(t_coord mouse_pos, t_button *button);
+int				in_button_u(t_coord mouse_pos, t_button *button, int index, int c_button);
+void			draw_vertical(int size, int posx, int posy, t_wind wind);
+void			draw_horizontal(int size, int posx, int posy, t_wind wind);
+void			draw_rect(t_wind wind, t_wall rect_pos);
+int				ft_draw_line3(t_wind wind, t_coord point, t_coord next_point, t_line line);
+void			write_rect(t_wall rect_pos, t_coord map_offset, t_fd fd);
+void			move_ray(t_cast * cast, t_player player);
+t_cast			advance_one(t_player player, char **map, t_cast *cast);
+void			write_edges(t_wall *corners, t_fd fd);
+int				check_char_down(t_player *player, t_wind wind);
+void      reset_char(t_player *player, t_wind wind);
+void      mod_char(t_player *player, t_gwall *gw_coords, char **walls);
+t_gwall		*createGameWalls(t_wall *w_coords, char **walls, t_wall corners);
+int				check_collision(t_gwall *gw_coords, t_vector nextpos, int wallslen);
+int				character_collides(t_player *player, t_gwall *gw_coords, char **walls, int axis);
 
 #endif

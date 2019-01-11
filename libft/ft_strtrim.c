@@ -12,7 +12,7 @@
 
 #include "libft.h"
 
-char	*ft_strtrim(char const *s)
+char	*ft_strtrim(char *s)
 {
 	char			*ss;
 	int				i;
@@ -35,6 +35,8 @@ char	*ft_strtrim(char const *s)
 			while (i <= j)
 				ss[++k] = s[++i];
 			ss[k] = '\0';
+			if (s)
+				ft_strdel(&s);
 			return (ss);
 		}
 	}

@@ -12,6 +12,7 @@
 
 #include "doom.h"
 
+
 void		init_cast(t_cast *cast, t_player player)
 {
 	cast->e = 0.000001;
@@ -37,15 +38,20 @@ void		draw_column(t_wind wind, int height, int x)
 		}
 		else
 		{
-			put_pixel32(wind.screen, x - SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2 - y, 0x000099);
-			put_pixel32(wind.screen, x - SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2 + y, 0x000099);
+			put_pixel32(wind.screen, x - SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2 - y, 0x556a8c);
+			put_pixel32(wind.screen, x - SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2 + y, 0x223759);
 		}
 	}
 }
 
 int			collision(int i, int j, char **map)
 {
-	if (j < 0 || i < 0 || !(map[j][i]) || (map[j][i] >= 'A' && map[j][i] <= 'Z') || map[j][i] == '+' || map[j][i] == '1')
+	int map_len;
+	int	map_height;
+
+	map_len = ft_tablen(map);
+	map_height = ft_strlen(map[0]);
+	if (j < 0 || i < 0 || j >= map_len || i >= map_height || (map[j][i] >= 'A' && map[j][i] <= 'Z') || map[j][i] == '+' || map[j][i] == '1')
 		return (1);
 	else
 		return (0);
@@ -112,38 +118,31 @@ void		rays(t_player player, char **map, t_wall *w_coords, char **walltxt, t_wind
 	//t_cast	*cast;
 	t_cast	second_cast;
 
-	i = -(SCREEN_WIDTH / 2);
+	i = -(SCREEN_WIDTH / 2) - 1;
 		while (++i < (SCREEN_WIDTH / 2))
 		{
 			height = -1;
-			player.ray.x = player.dir.x + (player.plane.x * -i / (SCREEN_WIDTH / 2));
-			player.ray.y = player.dir.y + (player.plane.y * -i / (SCREEN_WIDTH / 2));
+			player.ray.x = player.dir.x + (player.plane.x * -i / (SCREEN_WIDTH));
+			player.ray.y = player.dir.y + (player.plane.y * -i / (SCREEN_WIDTH));
 			init_cast(&second_cast, player);
 			while (height == -1)
 			{
-			//	printf("cast.i : %i  cast.j : %i\n", second_cast.i, second_cast.j);
 				second_cast = raycast(player, map, &second_cast);
-				height = (1 * (double)((double)SCREEN_WIDTH / (double) SCREEN_HEIGHT) * check_distance(player, second_cast, w_coords, map, walltxt, corners));
-				//if (height != -1)
-					printf("height: %i\n", height);
-				second_cast.dx= player.ray.x > 0 ? floor(second_cast.x_pos) + 1 - second_cast.x_pos :
-				ceil(second_cast.x_pos) - 1 - second_cast.x_pos;
-				second_cast.dy = player.ray.y > 0 ? floor(second_cast.y_pos) + 1 - second_cast.y_pos :
-				ceil(second_cast.y_pos) - 1 - second_cast.y_pos;
-				move_ray(&second_cast, player);
+				height =  (1 * (double)((double)SCREEN_WIDTH / (double) SCREEN_HEIGHT) * (check_distance(player, second_cast, w_coords, map, walltxt, corners)));
+				advance_one(player, map, &second_cast);
 				second_cast.object = 0;
 			}
 			draw_column(wind, height, i);
 		}
-		SDL_UpdateWindowSurface(wind.window);
+		//SDL_UpdateWindowSurface(wind.window);
 }
 
-/*int			main(int argc, char **argv)
+int			main(int argc, char **argv)
 {
 	t_player	player;
 	t_wind		wind;
 	t_fd		fd;
-	t_wall		*corners;
+	t_wall		corners;
 	t_wall		scorners;
 	char		**map;
 	double		tmp;
@@ -151,57 +150,81 @@ void		rays(t_player player, char **map, t_wall *w_coords, char **walltxt, t_wind
 	int			flag;
 	double		temp;
 	t_wall		*w_coords;
+	t_gwall		*gw_coords;
+//	TTF_Font	*police;
+	SDL_Color	black;
+	SDL_Surface	*text;
+	t_coord		past_pos;
+	t_coord		mouse_pos;
+	SDL_Rect	position;
 
+	text = NULL;
+	black.r = 255;
+	black.g = 255;
+	black.b = 255;
+	//police = NULL;
 	flag = 0;
 	walls = update_walls(walls, &w_coords, fd, flag);
-	corners = find_corners(walls, w_coords, corners);
-	scorners = *corners;
+	corners = find_corners(walls, w_coords);
+	scorners = corners;
+	gw_coords = createGameWalls(w_coords, walls, scorners);
 	wind = init_wind(wind);
+//	if(TTF_Init() == -1)
+//{
+//	printf("error\n");
+//	return(0);
+//}
 	player = init_player(player);
+	//police = TTF_OpenFont("font.ttf", 20);
 	map = readmap(argv[1]);
+	position.h = 50;
+	position.w = 100;
+	rays(player, map, w_coords, walls, wind, scorners);
+	SDL_SetRelativeMouseMode(SDL_TRUE);
+	SDL_SetWindowGrab(wind.window, 1);
+
+	SDL_UpdateWindowSurface(wind.window);
 	while (1)
 	{
 		while (SDL_PollEvent(&wind.event))
 		{
-			if (wind.event.type== SDL_KEYDOWN)
+			if (wind.event.type == SDL_MOUSEMOTION)
 			{
-				if (wind.event.key.keysym.sym == SDLK_ESCAPE)
-				{
-					SDL_DestroyWindow(wind.window);
-					SDL_Quit();
-					return (0);
-				}
-				if (wind.event.key.keysym.sym == SDLK_w)
-				{
-					player.pos.x  += player.dir.x * 0.09;
-					player.pos.y += player.dir.y * 0.09;
-				}
-				if (wind.event.key.keysym.sym == SDLK_s)
-				{
-					player.pos.x -= player.dir.x * 0.09;
-					player.pos.y -= player.dir.y * 0.09;
-				}
-				if (wind.event.key.keysym.sym == SDLK_d)
-				{
-					player.pos.x -= player.plane.x * 0.09;
-					player.pos.y -= player.plane.y * 0.09;
-				}
-				if (wind.event.key.keysym.sym == SDLK_a)
-				{
-					player.pos.x += player.plane.x * 0.09;
-					player.pos.y += player.plane.y * 0.09;
-				}
-				if (wind.event.key.keysym.sym == SDLK_RIGHT)
-				{
-					temp = player.dir.x;
-					player.dir.x = player.dir.x * cos(0.07) + player.dir.y * (-sin(0.07));
-					player.dir.y = temp * sin(0.07) + player.dir.y * cos(0.07);
-				}
-				SDL_FillRect(wind.screen, NULL, 0x000000);
-
+				SDL_GetRelativeMouseState(&mouse_pos.x, &mouse_pos.y);
+				temp = player.dir.x;
+				player.dir.x = player.dir.x * cos((double)((double)(-mouse_pos.x) / 500)) + player.dir.y * sin((double)(((double)(-mouse_pos.x)) / 500));
+				player.dir.y = player.dir.y * cos((double)((double)(-mouse_pos.x) / 500)) - temp * sin((double)((double)((double)(-mouse_pos.x) / 500)));
+				player.plane.x = player.dir.y;
+				player.plane.y = -player.dir.x;
 			}
-			//printf("pos.x: %f  pos.y: %f\n", player.pos.x, player.pos.y);
-			rays(player, map, w_coords, walls, wind, scorners);
+			if (wind.event.type == SDL_KEYDOWN)
+			{
+				if (!(check_char_down(&player, wind)))
+					return (0);
+			}
+			if (wind.event.type == SDL_KEYUP)
+				reset_char(&player, wind);
+			/*position.x = 500;
+			position.y = 200;
+			text = TTF_RenderText_Solid(police, ft_strjoin("X: ", ft_itoa(player.pos.x)), black);
+			SDL_BlitSurface(text, NULL, wind.screen, &position);
+			position.x = 600;
+			position.y = 200;
+			text = TTF_RenderText_Solid(police, ft_strjoin("Y: ", ft_itoa(player.pos.y)), black);
+			SDL_BlitSurface(text, NULL, wind.screen, &position);
+			position.x = 600;
+			position.y = 250;
+			text = TTF_RenderText_Solid(police, ft_strjoin("diry: ", ft_itoa(player.dir.y * 1000)), black);
+			SDL_BlitSurface(text, NULL, wind.screen, &position);
+			position.x = 500;
+			position.y = 250;
+			text = TTF_RenderText_Solid(police, ft_strjoin("dirx: ", ft_itoa(player.dir.x * 1000)), black);
+			SDL_BlitSurface(text, NULL, wind.screen, &position);
+			SDL_UpdateWindowSurface(wind.window);*/
 		}
+		mod_char(&player, gw_coords, walls);
+		SDL_FillRect(wind.screen, NULL, 0x000000);
+		rays(player, map, w_coords, walls, wind, scorners);
+		SDL_UpdateWindowSurface(wind.window);
 	}
-}*/
+}

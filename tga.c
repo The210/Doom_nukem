@@ -6,11 +6,13 @@
 /*   By: snicolet <marvin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2017/06/05 21:41:43 by snicolet          #+#    #+#             */
-/*   Updated: 2018/11/13 21:01:23 by dhorvill         ###   ########.fr       */
+/*   Updated: 2018/11/14 22:29:31 by smerelo          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "doom.h"
+
+
 
 unsigned int	get_colors(unsigned int pixel)
 {
@@ -36,15 +38,6 @@ static void			*load_tga_error(const char *error, void *file_content)
 		free(file_content);
 	ft_putendl(error);
 	return (NULL);
-}
-
-t_wind		init_wind(t_wind wind)
-{
-	wind.screen = NULL;
-	wind.window = SDL_CreateWindow("Doom_Nukem", SDL_WINDOWPOS_UNDEFINED,
-			SDL_WINDOWPOS_UNDEFINED, SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_SHOWN);
-	wind.screen = SDL_GetWindowSurface(wind.window);
-	return (wind);
 }
 
 static unsigned int	*pixels_to_rgba(unsigned int *pixels, size_t n)
@@ -141,7 +134,7 @@ unsigned int		*tga_load(const char *filepath, t_tga *specs)
 	if ((header->type != TGA_TYPE_TC_RAW) || (header->depth < 24))
 		return (load_tga_error("unsupported file format\n", file_content));
 	pixels_size = header->width * header->height * (header->depth >> 3) + 1;
-	printf("%lu - %lu\n", pixels_size, file_size - TGA_SIZE);
+	//printf("%lu - %lu\n", pixels_size, file_size - TGA_SIZE);
 	if ((pixels = malloc(pixels_size)))
 	{
 		ft_memcpy(pixels, &file_content[TGA_SIZE], pixels_size);
@@ -153,18 +146,6 @@ unsigned int		*tga_load(const char *filepath, t_tga *specs)
 	}
 	return (load_tga_error("failed to get pixels\n", file_content));
 }
-
-int		check_keydown(t_wind wind)
-{
-	if (wind.event.key.keysym.sym == SDLK_ESCAPE)
-	{
-		SDL_DestroyWindow(wind.window);
-		SDL_Quit();
-		return (0);
-	}
-	return (0);
-}
-
 /*int			main(int ac, char **av)
 {
 	t_tga specs;
@@ -173,28 +154,15 @@ int		check_keydown(t_wind wind)
 	int j;
 	int iprime;
 	int	jprime;
-	int pixel;
 	double	size;
-	Uint32 *pixs;
-	Uint32 color;
-	int count;
 	unsigned int *res_img;
 	t_wind wind;
-	pixel = -1;
+
 	i = -1;
-	count = 0;
 	size = 501;
 	iprime = size - 1;
 	wind = init_wind(wind);
-
-	pixs = (Uint32 *)wind.screen->pixels;
 	pixels = tga_load("download.tga", &specs);
-	tga_display(&specs);
-	while (count < 10)
-	{
-		printf("%i\n", pixels[count]);
-		count++;
-	}
 	res_img = resize(pixels, specs, size);
 	while (1)
 	{
@@ -213,7 +181,6 @@ int		check_keydown(t_wind wind)
 				{
 					put_pixel32(wind.screen, j, i, (Uint32)res_img[iprime * (int)size + jprime] - 0xFF000000);
 					jprime++;
-					//pixs[i * specs.width + j] = pixels[++pixel];
 				}
 				iprime--;
 			}
