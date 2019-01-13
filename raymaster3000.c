@@ -13,6 +13,35 @@
 #include "doom.h"
 
 
+t_wall		find_corners_game(char **walls, t_wall *w_coords)
+{
+	int i;
+	t_wall scorners;
+
+	scorners.start.x = w_coords[0].start.x;
+	scorners.start.y = w_coords[0].start.y;
+	scorners.end.x = w_coords[0].start.x;
+	scorners.end.y = w_coords[0].start.y;
+	i = -1;
+	while (++i < ft_tablen(walls))
+	{
+		scorners.start.x = scorners.start.x > w_coords[i].start.x ? w_coords[i].start.x : scorners.start.x;
+		scorners.start.x = scorners.start.x > w_coords[i].end.x ? w_coords[i].end.x : scorners.start.x;
+		scorners.end.x = scorners.end.x < w_coords[i].start.x ? w_coords[i].start.x : scorners.end.x;
+		scorners.end.x = scorners.end.x < w_coords[i].end.x ? w_coords[i].end.x : scorners.end.x;
+		scorners.start.y = scorners.start.y > w_coords[i].start.y ? w_coords[i].start.y : scorners.start.y;
+		scorners.start.y = scorners.start.y > w_coords[i].end.y ? w_coords[i].end.y : scorners.start.y;
+		scorners.end.y = scorners.end.y < w_coords[i].start.y ? w_coords[i].start.y : scorners.end.y;
+		scorners.end.y = scorners.end.y < w_coords[i].end.y ? w_coords[i].end.y : scorners.end.y;
+	}
+	scorners.start.x /= SCREEN_WIDTH / 50;
+	scorners.start.y /= SCREEN_HEIGHT / 50;
+	scorners.end.x /= SCREEN_WIDTH / 50;
+	scorners.end.y /= SCREEN_HEIGHT / 50;
+	//corners = &scorners;
+	return (scorners);
+}
+
 void		init_cast(t_cast *cast, t_player player)
 {
 	cast->e = 0.000001;
@@ -24,23 +53,28 @@ void		init_cast(t_cast *cast, t_player player)
 	cast->y_step = player.ray.y > 0 ? 1 : -1;
 }
 
-void		draw_column(t_wind wind, int height, int x)
+void		draw_column(t_wind wind, int height, int x, t_player player)
 {
 	int y;
 
 	y = -1;
-	while (++y < SCREEN_HEIGHT / 2)
+	while (++y < SCREEN_HEIGHT * 1.3)
 	{
-		if (y < height)
-		{
-			put_pixel32(wind.screen, x - SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2 + y, 0x0000FF);
-			put_pixel32(wind.screen, x - SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2 - y, 0x0000FF);
-		}
-		else
-		{
-			put_pixel32(wind.screen, x - SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2 - y, 0x556a8c);
-			put_pixel32(wind.screen, x - SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2 + y, 0x223759);
-		}
+		//to optmize
+			if (y < height)
+			{
+				if (y + (player.viewoff + player.posz * (double)((double)height/100)) + SCREEN_HEIGHT / 2 < SCREEN_HEIGHT)
+					put_pixel32(wind.screen, x - SCREEN_WIDTH / 2, SCREEN_HEIGHT  / 2 + y + (player.viewoff + player.posz * (double)((double)height/100)), 0x0000FF);
+				if(SCREEN_HEIGHT / 2 - y + (player.viewoff + player.posz * (double)((double)height/100)) >= 0)
+					put_pixel32(wind.screen, x - SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2 - y + (player.viewoff + player.posz * (double)((double)height/100)), 0x0000FF);
+			}
+			else
+			{
+				if (y + (player.viewoff + player.posz * (double)((double)height/100)) + SCREEN_HEIGHT / 2 < SCREEN_HEIGHT)
+					put_pixel32(wind.screen, x - SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2 + y + (player.viewoff + player.posz * (double)((double)height/100)), 0x556a8c);
+				if(SCREEN_HEIGHT / 2 - y + (player.viewoff + player.posz * (double)((double)height/100))>= 0)
+					put_pixel32(wind.screen, x - SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2 - y + (player.viewoff + player.posz * (double)((double)height/100)), 0x556a8c);
+			}
 	}
 }
 
@@ -132,12 +166,14 @@ void		rays(t_player player, char **map, t_wall *w_coords, char **walltxt, t_wind
 				advance_one(player, map, &second_cast);
 				second_cast.object = 0;
 			}
-			draw_column(wind, height, i);
+			draw_column(wind, height, i, player);
 		}
 		//SDL_UpdateWindowSurface(wind.window);
 }
 
-int			main(int argc, char **argv)
+
+
+/*int			main(int argc, char **argv)
 {
 	t_player	player;
 	t_wind		wind;
@@ -148,7 +184,9 @@ int			main(int argc, char **argv)
 	double		tmp;
 	char 		**walls;
 	int			flag;
+	int			jump_height;
 	double		temp;
+	double 		crouch;
 	t_wall		*w_coords;
 	t_gwall		*gw_coords;
 //	TTF_Font	*police;
@@ -158,14 +196,16 @@ int			main(int argc, char **argv)
 	t_coord		mouse_pos;
 	SDL_Rect	position;
 
+	jump_height = 100;
 	text = NULL;
 	black.r = 255;
+	crouch = -50;
 	black.g = 255;
 	black.b = 255;
 	//police = NULL;
 	flag = 0;
 	walls = update_walls(walls, &w_coords, fd, flag);
-	corners = find_corners(walls, w_coords);
+	corners = find_corners_game(walls, w_coords);
 	scorners = corners;
 	gw_coords = createGameWalls(w_coords, walls, scorners);
 	wind = init_wind(wind);
@@ -196,6 +236,8 @@ int			main(int argc, char **argv)
 				player.dir.y = player.dir.y * cos((double)((double)(-mouse_pos.x) / 500)) - temp * sin((double)((double)((double)(-mouse_pos.x) / 500)));
 				player.plane.x = player.dir.y;
 				player.plane.y = -player.dir.x;
+				if(player.viewoff + -mouse_pos.y + player.posz < 390 && player.viewoff + -mouse_pos.y + player.posz > -390)
+					player.viewoff += -mouse_pos.y;
 			}
 			if (wind.event.type == SDL_KEYDOWN)
 			{
@@ -204,27 +246,11 @@ int			main(int argc, char **argv)
 			}
 			if (wind.event.type == SDL_KEYUP)
 				reset_char(&player, wind);
-			/*position.x = 500;
-			position.y = 200;
-			text = TTF_RenderText_Solid(police, ft_strjoin("X: ", ft_itoa(player.pos.x)), black);
-			SDL_BlitSurface(text, NULL, wind.screen, &position);
-			position.x = 600;
-			position.y = 200;
-			text = TTF_RenderText_Solid(police, ft_strjoin("Y: ", ft_itoa(player.pos.y)), black);
-			SDL_BlitSurface(text, NULL, wind.screen, &position);
-			position.x = 600;
-			position.y = 250;
-			text = TTF_RenderText_Solid(police, ft_strjoin("diry: ", ft_itoa(player.dir.y * 1000)), black);
-			SDL_BlitSurface(text, NULL, wind.screen, &position);
-			position.x = 500;
-			position.y = 250;
-			text = TTF_RenderText_Solid(police, ft_strjoin("dirx: ", ft_itoa(player.dir.x * 1000)), black);
-			SDL_BlitSurface(text, NULL, wind.screen, &position);
-			SDL_UpdateWindowSurface(wind.window);*/
 		}
+		player = jump_crouch(player);
 		mod_char(&player, gw_coords, walls);
 		SDL_FillRect(wind.screen, NULL, 0x000000);
 		rays(player, map, w_coords, walls, wind, scorners);
 		SDL_UpdateWindowSurface(wind.window);
 	}
-}
+}*/

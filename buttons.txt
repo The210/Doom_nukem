@@ -1,2 +1,3 @@
-100.1150:35:download.tga
-200.1150:40:gravelle.tga
+100.950:40:download.tga
+200.950:40:gravelle.tga
+300.950:40:gravelle.tga

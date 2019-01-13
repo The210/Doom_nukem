@@ -45,31 +45,31 @@ char		**read_squares(t_fd fd)
 	return (walls);
 }
 
-t_wall		find_corners(char **walls, t_wall *w_coords)
+t_wall		find_corners(char **walls, t_wall *w_coords, t_wall *corners)
 {
 	int i;
 	t_wall scorners;
 
-	scorners.start.x = w_coords[0].start.x;
-	scorners.start.y = w_coords[0].start.y;
-	scorners.end.x = w_coords[0].start.x;
-	scorners.end.y = w_coords[0].start.y;
+	corners->start.x = w_coords[0].start.x;
+	corners->start.y = w_coords[0].start.y;
+	corners->end.x = w_coords[0].start.x;
+	corners->end.y = w_coords[0].start.y;
 	i = -1;
 	while (++i < ft_tablen(walls))
 	{
-		scorners.start.x = scorners.start.x > w_coords[i].start.x ? w_coords[i].start.x : scorners.start.x;	
-		scorners.start.x = scorners.start.x > w_coords[i].end.x ? w_coords[i].end.x : scorners.start.x;
-		scorners.end.x = scorners.end.x < w_coords[i].start.x ? w_coords[i].start.x : scorners.end.x;
-		scorners.end.x = scorners.end.x < w_coords[i].end.x ? w_coords[i].end.x : scorners.end.x;
-		scorners.start.y = scorners.start.y > w_coords[i].start.y ? w_coords[i].start.y : scorners.start.y;	
-		scorners.start.y = scorners.start.y > w_coords[i].end.y ? w_coords[i].end.y : scorners.start.y;
-		scorners.end.y = scorners.end.y < w_coords[i].start.y ? w_coords[i].start.y : scorners.end.y;
-		scorners.end.y = scorners.end.y < w_coords[i].end.y ? w_coords[i].end.y : scorners.end.y;
+		corners->start.x = corners->start.x > w_coords[i].start.x ? w_coords[i].start.x : corners->start.x;
+		corners->start.x = corners->start.x > w_coords[i].end.x ? w_coords[i].end.x : corners->start.x;
+		corners->end.x = corners->end.x < w_coords[i].start.x ? w_coords[i].start.x : corners->end.x;
+		corners->end.x = corners->end.x < w_coords[i].end.x ? w_coords[i].end.x : corners->end.x;
+		corners->start.y = corners->start.y > w_coords[i].start.y ? w_coords[i].start.y : corners->start.y;
+		corners->start.y = corners->start.y > w_coords[i].end.y ? w_coords[i].end.y : corners->start.y;
+		corners->end.y = corners->end.y < w_coords[i].start.y ? w_coords[i].start.y : corners->end.y;
+		corners->end.y = corners->end.y < w_coords[i].end.y ? w_coords[i].end.y : corners->end.y;
 	}
-	scorners.start.x /= SCREEN_WIDTH / 50;
-	scorners.start.y /= SCREEN_HEIGHT / 50;
-	scorners.end.x /= SCREEN_WIDTH / 50;
-	scorners.end.y /= SCREEN_HEIGHT / 50;
+	corners->start.x /= SCREEN_WIDTH / 50;
+	corners->start.y /= SCREEN_HEIGHT / 50;
+	corners->end.x /= SCREEN_WIDTH / 50;
+	corners->end.y /= SCREEN_HEIGHT / 50;
 	//corners = &scorners;
 	return (scorners);
 }
@@ -169,8 +169,8 @@ char	**create_map(t_fd fd, char **walls, t_wall *w_coords, char **map, t_wall *c
 	char	**squares;
 	t_wall	tmp_cor;
 
-	tmp_cor = find_corners(walls, w_coords);
-	corners = &tmp_cor;
+	tmp_cor = find_corners(walls, w_coords, corners);
+	//corners = &tmp_cor;
 	if ((map = (char**)malloc(sizeof(map) * (corners->end.y - corners->start.y + 2))) == 0)
 		return NULL;
 	map[corners->end.y - corners->start.y] = NULL;

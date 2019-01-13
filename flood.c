@@ -113,7 +113,7 @@ char	**determine_rooms(char **map, int a, int b, char flood)
 	return (map);
 }
 
-char	**flood_all(char **map, t_wall corners)
+char	**flood_all(char **map, t_wall *corners)
 {
 	int		i;
 	int		j;
@@ -123,15 +123,16 @@ char	**flood_all(char **map, t_wall corners)
 	flood = 'a';
 	room = 1;
 	i = -1;
+	printf("Corners.start.x : %i   Corners.start.y : %i\nCorners.end.x : %i   Corners.end.y : %i\n", corners->start.x,corners->start.y, corners->end.x, corners->end.y);
 	while (room)
 	{
 		room = 0;
-		while (++i < corners.end.y - corners.start.y)
+		while (++i < corners->end.y - corners->start.y)
 		{
 			j = -1;
-			while (++j < corners.end.x - corners.start.x)
+			while (++j < corners->end.x - corners->start.x)
 			{
-				if (i < corners.end.y - corners.start.y && j < corners.end.x - corners.start.x  && map[i][j] == '0')
+				if (i < corners->end.y - corners->start.y && j < corners->end.x - corners->start.x  && map[i][j] == '0')
 				{
 					map = determine_rooms(map, j, i, flood);
 					room = 1;

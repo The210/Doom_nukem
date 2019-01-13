@@ -6,7 +6,7 @@
 /*   By: dhorvill <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/09/08 21:23:19 by dhorvill          #+#    #+#             */
-/*   Updated: 2018/12/01 00:47:14 by smerelo          ###   ########.fr       */
+/*   Updated: 2019/01/13 15:08:19 by dhorvill         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,7 +14,7 @@
 #ifndef DOOM_H
 # define DOOM_H
 
-# include "SDL2/SDL.h"
+# include "SDL.h"
 //# include "SDL_ttf.h"
 # include "libft.h"
 # include "get_next_line.h"
@@ -22,8 +22,8 @@
 # include <sys/types.h>
 # include <sys/stat.h>
 
-# define SCREEN_HEIGHT 800
-# define SCREEN_WIDTH 800
+# define SCREEN_HEIGHT 1000
+# define SCREEN_WIDTH 1000
 # define TEXTURE 500
 
 typedef struct	s_pixels
@@ -48,6 +48,7 @@ typedef struct	s_fd
 	int			squares;
 	int			map;
 	int			buttonss;
+	int			lights;
 }				t_fd;
 
 typedef	struct	s_rect
@@ -72,25 +73,12 @@ typedef	struct	s_line
 	t_coord		offset;
 }				t_line;
 
-typedef struct	s_vector
-{
-	double		x;
-	double		y;
-}				t_vector;
-
 typedef struct	s_wall
 {
 	t_coord		start;
 	t_coord		end;
 	int			error;
 }				t_wall;
-
-typedef struct	s_gwall
-{
-	t_vector			start;
-	t_vector			end;
-	int						error;
-}								t_gwall;
 
 typedef struct	s_cast
 {
@@ -122,6 +110,11 @@ typedef struct	s_misc
 
 }				t_misc;
 
+typedef struct	s_vector
+{
+	double		x;
+	double		y;
+}				t_vector;
 
 typedef struct	s_dvector
 {
@@ -137,12 +130,20 @@ typedef struct	s_special
 	int			error;
 }				t_special;
 
+typedef struct 	s_gwall
+{
+	t_vector 	start;
+	t_vector 	end;
+	int 		error;
+}				t_gwall;
+
 typedef struct	s_player
 {
 	t_vector	pos;
 	t_vector	dir;
 	t_vector	plane;
 	t_vector	ray;
+	double		viewoff;
 	double		angularspeed;
 	double		speed;
 	double		runspeed;
@@ -153,7 +154,12 @@ typedef struct	s_player
 	double		aspeed;
 	double		sspeed;
 	double		dspeed;
+	double		posz;
 	int			error;
+	int			jump;
+	int			crouch;
+	int			jump_height;
+	int			crouch_height;
 }				t_player;
 
 typedef struct	s_wind
@@ -185,6 +191,14 @@ typedef struct	s_button
 	int				select;
 }				t_button;
 
+typedef struct	s_light
+{
+	t_coord				pos;
+	int						color;
+	double				intensity;
+	SDL_Rect			rect;
+	char					**map;
+}								t_light;
 
 void			put_pixel32(SDL_Surface *surface, int x, int y, Uint32 pixel);
 Uint32			get_pixel(SDL_Surface *surface, int x, int y);
@@ -197,7 +211,7 @@ void			line_path(t_coord start, t_coord end, t_fd fd);
 t_wall			find_croners(char **walls, t_wall *w_coords, t_wall corner);
 char			**create_map(t_fd fd, char **wals, t_wall *w_coords, char **map, t_wall *corners);
 int				ft_iatoi(char *wall, int index);
-char			**flood_all(char **map, t_wall corners);
+char			**flood_all(char **map, t_wall *corners);
 void			write_map(t_fd, char **map);
 char			**readmap(char *argv);
 t_player		init_player(t_player player);
@@ -205,7 +219,7 @@ t_wind			init_wind(t_wind wind);
 double			check_distance(t_player player, t_cast cast, t_wall *w_coords, char **map, char **walltxt, t_wall corners);
 char			**update_walls(char **walls, t_wall **w_coords, t_fd fd, int flag);
 char			**read_squares(t_fd fd);
-t_wall			find_corners(char **walls, t_wall *w_coords);
+t_wall			find_corners(char **walls, t_wall *w_coords, t_wall *corners);
 void			buttons(t_button button, t_fd fd);
 unsigned int 	*resize(unsigned int *pixels, t_tga specs, double size);
 t_button		fill_button(t_button button);
@@ -222,11 +236,18 @@ void			write_rect(t_wall rect_pos, t_coord map_offset, t_fd fd);
 void			move_ray(t_cast * cast, t_player player);
 t_cast			advance_one(t_player player, char **map, t_cast *cast);
 void			write_edges(t_wall *corners, t_fd fd);
-int				check_char_down(t_player *player, t_wind wind);
-void      reset_char(t_player *player, t_wind wind);
-void      mod_char(t_player *player, t_gwall *gw_coords, char **walls);
-t_gwall		*createGameWalls(t_wall *w_coords, char **walls, t_wall corners);
+int      		check_char_down(t_player *player, t_wind wind);
+void  			reset_char(t_player *player, t_wind wind);
+void			mod_char(t_player *player, t_gwall *gw_coords, char **walls);
+t_player    	jump_crouch(t_player player);
+t_gwall			*createGameWalls(t_wall *w_coords, char **walls, t_wall corners);
 int				check_collision(t_gwall *gw_coords, t_vector nextpos, int wallslen);
 int				character_collides(t_player *player, t_gwall *gw_coords, char **walls, int axis);
+char	    **read_lights(t_fd fd);
+t_light   *separate_lights(t_light *lights, char **lightmap);
+t_light   *update_lights(t_light *lights, t_fd fd);
+void      re_draw_lights(t_wind wind, t_light *lights, t_coord map_offset);
+void      draw_light(t_wind wind, t_light light);
+void      w_light_coords(t_coord start, t_coord end, t_fd fd, t_coord offset);
 
 #endif

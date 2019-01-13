@@ -47,7 +47,12 @@ t_player	init_player(t_player player)
 	player.plane.y = -player.dir.x;
 	player.angularspeed = 0.07;
 	player.speed = 0.5;
-	player.pos.x = 5.2;
-	player.pos.y = 2.2;	
+	player.pos.x = 15.2;
+	player.pos.y = 13.2;
+	player.posz = 0;
+	player.jump = 0;
+	player.crouch = 0;
+  	player.crouch_height = -50;
+  	player.jump_height = 100;
 	return (player);
 }
